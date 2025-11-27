@@ -1,11 +1,11 @@
 <?php
 // Variables
 return [
-    'creatorName' => 'Pixinvent',
-    'creatorUrl' => 'https://pixinvent.com',
-    'templateName' => 'Materialize',
-    'templateSuffix' => 'Bootstrap Admin Template',
-    'templateVersion' => '3.0.0',
+    'creatorName' => 'Tabrizah',
+    'creatorUrl' => 'https://tabrizah.com/',
+    'templateName' => 'Tabrizah Infrastructure',
+    'templateSuffix' => 'Pro',
+    'templateVersion' => '1.0.0',
     'templateFree' => false,
     'templateDescription' => 'Start your development with a Dashboard for Bootstrap 5',
     'templateKeyword' => 'dashboard, bootstrap 5 dashboard, bootstrap 5 design, bootstrap 5',
