@@ -13,6 +13,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -36,9 +39,45 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
+        });
+
+
+        Fortify::loginView(function () {
+            $pageConfigs = ['myLayout' => 'blank'];
+
+            return view('content.authentications.login', compact('pageConfigs'));
+        });
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+
+            if (! $user) {
+                return null;
+            }
+
+            try {
+                if (Hash::check($request->password, $user->password)) {
+                    return $user;
+                }
+            } catch (RuntimeException $exception) {
+                if (Str::contains($exception->getMessage(), 'Bcrypt algorithm')) {
+                    if (password_verify($request->password, $user->password)) {
+                        // Rehash legacy bcrypt ($2a$) passwords so future logins use Laravel's default format.
+                        $user->forceFill([
+                            'password' => Hash::make($request->password),
+                        ])->save();
+
+                        return $user;
+                    }
+
+                    return null;
+                }
+
+                throw $exception;
+            }
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
