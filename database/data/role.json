@@ -1,0 +1,63 @@
+{
+  "roles": [
+    {
+      "name": "admin",
+      "guard_name": "web",
+      "permissions": [
+        "users.view",
+        "users.create",
+        "users.update",
+        "users.delete",
+        "users.assign-roles",
+
+        "students.view",
+        "students.create",
+        "students.update",
+        "students.delete",
+        "students.assign-rfid",
+        "students.assign-classroom",
+
+        "teachers.view",
+        "teachers.create",
+        "teachers.update",
+        "teachers.delete",
+        "teachers.assign-subjects",
+        "teachers.assign-classroom",
+
+        "classrooms.view",
+        "classrooms.create",
+        "classrooms.update",
+        "classrooms.delete",
+        "classrooms.assign-students",
+        "classrooms.assign-homeroom",
+        "classrooms.assign-subjects",
+
+        "subjects.view",
+        "subjects.create",
+        "subjects.update",
+        "subjects.delete",
+        "subjects.assign-teachers",
+        "subjects.assign-classrooms"
+      ]
+    },
+    {
+      "name": "teacher",
+      "guard_name": "web",
+      "permissions": [
+        "students.view",
+        "teachers.view",
+        "classrooms.view",
+        "subjects.view"
+      ]
+    },
+    {
+      "name": "student",
+      "guard_name": "web",
+      "permissions": [
+        "students.view",
+        "classrooms.view",
+        "subjects.view"
+      ]
+    }
+  ]
+}

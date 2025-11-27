@@ -1,0 +1,38 @@
+{
+  "permissions": [
+    { "name": "users.view", "guard_name": "web" },
+    { "name": "users.create", "guard_name": "web" },
+    { "name": "users.update", "guard_name": "web" },
+    { "name": "users.delete", "guard_name": "web" },
+    { "name": "users.assign-roles", "guard_name": "web" },
+
+    { "name": "students.view", "guard_name": "web" },
+    { "name": "students.create", "guard_name": "web" },
+    { "name": "students.update", "guard_name": "web" },
+    { "name": "students.delete", "guard_name": "web" },
+    { "name": "students.assign-rfid", "guard_name": "web" },
+    { "name": "students.assign-classroom", "guard_name": "web" },
+
+    { "name": "teachers.view", "guard_name": "web" },
+    { "name": "teachers.create", "guard_name": "web" },
+    { "name": "teachers.update", "guard_name": "web" },
+    { "name": "teachers.delete", "guard_name": "web" },
+    { "name": "teachers.assign-subjects", "guard_name": "web" },
+    { "name": "teachers.assign-classroom", "guard_name": "web" },
+
+    { "name": "classrooms.view", "guard_name": "web" },
+    { "name": "classrooms.create", "guard_name": "web" },
+    { "name": "classrooms.update", "guard_name": "web" },
+    { "name": "classrooms.delete", "guard_name": "web" },
+    { "name": "classrooms.assign-students", "guard_name": "web" },
+    { "name": "classrooms.assign-homeroom", "guard_name": "web" },
+    { "name": "classrooms.assign-subjects", "guard_name": "web" },
+
+    { "name": "subjects.view", "guard_name": "web" },
+    { "name": "subjects.create", "guard_name": "web" },
+    { "name": "subjects.update", "guard_name": "web" },
+    { "name": "subjects.delete", "guard_name": "web" },
+    { "name": "subjects.assign-teachers", "guard_name": "web" },
+    { "name": "subjects.assign-classrooms", "guard_name": "web" }
+  ]
+}
