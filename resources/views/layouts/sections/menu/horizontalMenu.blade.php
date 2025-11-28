@@ -1,6 +1,44 @@
 @php
   use Illuminate\Support\Facades\Route;
+  use Illuminate\Support\Str;
   $configData = Helper::appClasses();
+
+  $isMenuActive = function ($item) use (&$isMenuActive) {
+      $currentRouteName = Route::currentRouteName();
+      $slugs = $item->slug ?? null;
+
+      $matchesSlug = function ($slug) use ($currentRouteName) {
+          if (! $slug) {
+              return false;
+          }
+
+          return $currentRouteName === $slug || Str::startsWith($currentRouteName, $slug . '.');
+      };
+
+      if (is_array($slugs)) {
+          foreach ($slugs as $slug) {
+              if ($matchesSlug($slug)) {
+                  return true;
+              }
+          }
+
+          return false;
+      }
+
+      if ($matchesSlug($slugs)) {
+          return true;
+      }
+
+      if (isset($item->submenu)) {
+          foreach ($item->submenu as $submenu) {
+              if ($isMenuActive($submenu)) {
+                  return true;
+              }
+          }
+      }
+
+      return false;
+  };
 @endphp
 <!-- Horizontal Menu -->
 <aside id="layout-menu" class="layout-menu-horizontal menu-horizontal  menu flex-grow-0"
@@ -11,24 +49,7 @@
       @foreach ($menuData[1]->menu as $menu)
         {{-- active menu method --}}
         @php
-          $activeClass = null;
-          $currentRouteName = Route::currentRouteName();
-
-          if ($currentRouteName === $menu->slug) {
-              $activeClass = 'active';
-          } elseif (isset($menu->submenu)) {
-              if (gettype($menu->slug) === 'array') {
-                  foreach ($menu->slug as $slug) {
-                      if (str_contains($currentRouteName, $slug) and strpos($currentRouteName, $slug) === 0) {
-                          $activeClass = 'active';
-                      }
-                  }
-              } else {
-                  if (str_contains($currentRouteName, $menu->slug) and strpos($currentRouteName, $menu->slug) === 0) {
-                      $activeClass = 'active';
-                  }
-              }
-          }
+          $activeClass = $isMenuActive($menu) ? 'active' : null;
         @endphp
 
         {{-- main menu --}}
@@ -44,7 +65,7 @@
 
           {{-- submenu --}}
           @isset($menu->submenu)
-            @include('layouts.sections.menu.submenu', ['menu' => $menu->submenu])
+            @include('layouts.sections.menu.submenu', ['menu' => $menu->submenu, 'isMenuActive' => $isMenuActive])
           @endisset
         </li>
       @endforeach

@@ -1,5 +1,6 @@
 @php
   use Illuminate\Support\Facades\Route;
+  use Illuminate\Support\Str;
 @endphp
 
 <ul class="menu-sub">
@@ -11,20 +12,23 @@
         $active = $configData['layout'] === 'vertical' ? 'active open' : 'active';
         $currentRouteName = Route::currentRouteName();
 
-        if ($currentRouteName === $submenu->slug) {
-            $activeClass = 'active';
-        } elseif (isset($submenu->submenu)) {
-            if (gettype($submenu->slug) === 'array') {
-                foreach ($submenu->slug as $slug) {
-                    if (str_contains($currentRouteName, $slug) and strpos($currentRouteName, $slug) === 0) {
-                        $activeClass = $active;
-                    }
+        $matchesSlug = function ($slug) use ($currentRouteName) {
+            return $currentRouteName === $slug || Str::startsWith($currentRouteName, $slug . '.');
+        };
+
+        $slugs = $submenu->slug ?? null;
+
+        if (is_array($slugs)) {
+            foreach ($slugs as $slug) {
+                if ($matchesSlug($slug)) {
+                    $activeClass = $active;
                 }
-            } else {
-                if (
-                    str_contains($currentRouteName, $submenu->slug) and
-                    strpos($currentRouteName, $submenu->slug) === 0
-                ) {
+            }
+        } elseif ($matchesSlug($slugs)) {
+            $activeClass = $active;
+        } elseif (isset($submenu->submenu ?? null)) {
+            foreach ($submenu->submenu as $nested) {
+                if (isset($isMenuActive) && $isMenuActive($nested)) {
                     $activeClass = $active;
                 }
             }

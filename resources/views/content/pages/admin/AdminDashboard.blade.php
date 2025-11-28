@@ -7,7 +7,7 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-    <h4>Selamat Datang {{ Auth::user()->name }}</h4>
+    <h4>Selamat Datang {{ auth()->user()->name }}</h4>
     <div class="row g-6">
         <!-- Gamification Card -->
         <div class="col-md-12 col-xxl-12">

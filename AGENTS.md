@@ -6,14 +6,24 @@ Sistem absensi sekolah berbasis RFID dengan fokus pada manajemen data master unt
 
 ## Tech Stack
 
+### Backend
 - **Framework**: Laravel 12
 - **PHP Version**: 8.2+
 - **Architecture Pattern**: Repository-Service Pattern
 - **Authentication**: Laravel Fortify
 - **Authorization**: Spatie Laravel Permission
-- **Activity Logging**: Spatie Laravel Activity Log
-- **DataTables**: Yajra Laravel DataTables
+- **Activity Logging**: Spatie Laravel Activity Log (to be implemented)
+- **DataTables**: Yajra Laravel DataTables (server-side processing)
 - **Development Tools**: Laravel Pail, Laravel Pint, PHPUnit
+
+### Frontend
+- **Template**: Materialize Admin Template (Blade-based)
+- **CSS Framework**: Bootstrap 5 / Materialize
+- **JavaScript**: Vanilla JS + jQuery (untuk DataTables)
+- **DataTables**: jQuery DataTables dengan AJAX
+- **Notifications**: SweetAlert2
+- **Icons**: Material Icons / Font Awesome
+- **Build Tool**: Vite
 
 ## Project Architecture
 
@@ -78,38 +88,52 @@ app/
 - Accessors & Mutators
 - Model events
 
-## MVP Features (Backend Only)
+## MVP Features
 
-### 1. User Management (Kelola Semua User)
-- CRUD operations untuk semua user (Admin, Teacher, Student)
-- Role & Permission management (menggunakan Spatie Permission)
-- User authentication & authorization
-- Activity logging untuk audit trail
+> **Implementation Approach**: Sistem dibangun dengan **Web-First approach** menggunakan Blade templates + AJAX untuk interaksi dinamis. Testing dan dokumentasi API akan dilakukan setelah semua fitur MVP selesai untuk efisiensi development.
 
-**Endpoints:**
+### 1. User Management (Kelola Semua User) ✅ **COMPLETED**
+- ✅ CRUD operations untuk semua user (Admin, Teacher, Student)
+- ✅ Role & Permission management (menggunakan Spatie Permission)
+- ✅ User authentication & authorization dengan middleware
+- ✅ DataTables server-side processing untuk performance
+- ✅ Rich UI dengan modal forms, SweetAlert2 confirmations
+- ✅ Role-based navigation dan menu filtering
+
+**Implemented Routes (Web + AJAX):**
 ```
-GET    /api/users              # List all users
-GET    /api/users/{id}         # Get user detail
-POST   /api/users              # Create new user
-PUT    /api/users/{id}         # Update user
-DELETE /api/users/{id}         # Delete user
-POST   /api/users/{id}/roles   # Assign roles
+GET     /admin/users              # List users (DataTables)
+POST    /admin/users              # Create new user
+GET     /admin/users/{user}       # Get user detail (JSON)
+PUT     /admin/users/{user}       # Update user
+DELETE  /admin/users/{user}       # Delete user
+POST    /admin/users/{user}/roles # Assign roles
 ```
+
+**Implementation Details:**
+- Repository: `UserRepository` dengan interface `UserRepositoryInterface`
+- Service: `UserService` dengan transaction management
+- Controller: `admin/UserController` dengan permission middleware
+- Requests: `StoreUserRequest`, `UpdateUserRequest`, `UpdateUserRolesRequest`
+- Resource: `UserResource` untuk consistent JSON responses
+- Views: `resources/views/content/pages/admin/users/`
+- JS: `resources/js/admin/user-management.js` (DataTables + AJAX)
 
 ### 2. Student Management (Kelola Pelajar)
 - CRUD students
 - Assign RFID card to student
 - Assign student to classroom
 - Student profile management
+- DataTables interface dengan search & filter
 
-**Endpoints:**
+**Required Routes:**
 ```
-GET    /api/students           # List all students
-GET    /api/students/{id}      # Get student detail
-POST   /api/students           # Create new student
-PUT    /api/students/{id}      # Update student
-DELETE /api/students/{id}      # Delete student
-PUT    /api/students/{id}/rfid # Assign/Update RFID
+GET     /admin/students              # List students (DataTables)
+POST    /admin/students              # Create new student
+GET     /admin/students/{student}    # Get student detail (JSON)
+PUT     /admin/students/{student}    # Update student
+DELETE  /admin/students/{student}    # Delete student
+PUT     /admin/students/{student}/rfid # Assign/Update RFID
 ```
 
 ### 3. Teacher Management (Kelola Guru)
@@ -117,14 +141,15 @@ PUT    /api/students/{id}/rfid # Assign/Update RFID
 - Teacher profile management
 - Assign subjects to teacher
 - Assign teacher to classroom (as homeroom teacher)
+- DataTables interface dengan search & filter
 
-**Endpoints:**
+**Required Routes:**
 ```
-GET    /api/teachers           # List all teachers
-GET    /api/teachers/{id}      # Get teacher detail
-POST   /api/teachers           # Create new teacher
-PUT    /api/teachers/{id}      # Update teacher
-DELETE /api/teachers/{id}      # Delete teacher
+GET     /admin/teachers              # List teachers (DataTables)
+POST    /admin/teachers              # Create new teacher
+GET     /admin/teachers/{teacher}    # Get teacher detail (JSON)
+PUT     /admin/teachers/{teacher}    # Update teacher
+DELETE  /admin/teachers/{teacher}    # Delete teacher
 ```
 
 ### 4. Classroom Management (Kelola Kelas)
@@ -132,29 +157,31 @@ DELETE /api/teachers/{id}      # Delete teacher
 - Assign students to classroom
 - Assign homeroom teacher
 - Classroom capacity management
+- DataTables interface dengan search & filter
 
-**Endpoints:**
+**Required Routes:**
 ```
-GET    /api/classrooms             # List all classrooms
-GET    /api/classrooms/{id}        # Get classroom detail
-POST   /api/classrooms             # Create new classroom
-PUT    /api/classrooms/{id}        # Update classroom
-DELETE /api/classrooms/{id}        # Delete classroom
-POST   /api/classrooms/{id}/students  # Assign students
+GET     /admin/classrooms                 # List classrooms (DataTables)
+POST    /admin/classrooms                 # Create new classroom
+GET     /admin/classrooms/{classroom}     # Get classroom detail (JSON)
+PUT     /admin/classrooms/{classroom}     # Update classroom
+DELETE  /admin/classrooms/{classroom}     # Delete classroom
+POST    /admin/classrooms/{classroom}/students  # Assign students
 ```
 
 ### 5. Subject Management (Kelola Mata Pelajaran)
 - CRUD subjects
 - Assign teachers to subjects
 - Link subjects to classrooms
+- DataTables interface dengan search & filter
 
-**Endpoints:**
+**Required Routes:**
 ```
-GET    /api/subjects           # List all subjects
-GET    /api/subjects/{id}      # Get subject detail
-POST   /api/subjects           # Create new subject
-PUT    /api/subjects/{id}      # Update subject
-DELETE /api/subjects/{id}      # Delete subject
+GET     /admin/subjects              # List subjects (DataTables)
+POST    /admin/subjects              # Create new subject
+GET     /admin/subjects/{subject}    # Get subject detail (JSON)
+PUT     /admin/subjects/{subject}    # Update subject
+DELETE  /admin/subjects/{subject}    # Delete subject
 ```
 
 ## Database Schema (Required Migrations)
@@ -283,58 +310,82 @@ subjects.delete
 
 ## Development Roadmap
 
-### Phase 1: Foundation Setup (Current)
+### Phase 1: Foundation Setup ✅ **COMPLETED**
 - [x] Laravel 12 installation
 - [x] Fortify authentication setup
 - [x] Spatie Permission setup
 - [x] Basic directory structure (Repositories, Services)
 - [x] Create AGENTS.md documentation
+- [x] Role & Permission seeders with JSON data
+- [x] Default user seeder
 
-### Phase 2: Database & Models
-- [ ] Create all migrations (students, teachers, classrooms, subjects, pivot tables)
+### Phase 2: User Management (Feature #1) ✅ **COMPLETED**
+- [x] User Repository (Interface + Implementation)
+- [x] User Service dengan transaction management
+- [x] User Controller dengan permission middleware
+- [x] Form Request validators (Store, Update, UpdateRoles)
+- [x] UserResource untuk JSON responses
+- [x] DataTables server-side integration
+- [x] Web UI dengan modal forms
+- [x] JavaScript module (AJAX + SweetAlert2)
+- [x] Role-based navigation system
+- [x] Admin routes dan menu integration
+
+### Phase 3: Database & Models (Student, Teacher, Classroom, Subject)
+- [ ] Create migrations (students, teachers, classrooms, subjects, pivot tables)
 - [ ] Create Eloquent models with relationships
-- [ ] Setup model factories for testing
-- [ ] Database seeders for initial data
+- [ ] Setup model factories
+- [ ] Database seeders untuk initial data
 
-### Phase 3: Repository Layer
-- [ ] Create Repository Contracts (Interfaces)
-- [ ] Implement User Repository
-- [ ] Implement Student Repository
-- [ ] Implement Teacher Repository
-- [ ] Implement Classroom Repository
-- [ ] Implement Subject Repository
-- [ ] Bind repositories to service container
+### Phase 4: Student Management (Feature #2)
+- [ ] Student Repository Layer
+- [ ] Student Service Layer
+- [ ] Student Controller & Routes
+- [ ] Student Form Requests & Resource
+- [ ] Student UI (DataTables + Modal)
+- [ ] RFID card assignment functionality
 
-### Phase 4: Service Layer
-- [ ] Create UserService
-- [ ] Create StudentService
-- [ ] Create TeacherService
-- [ ] Create ClassroomService
-- [ ] Create SubjectService
+### Phase 5: Teacher Management (Feature #3)
+- [ ] Teacher Repository Layer
+- [ ] Teacher Service Layer
+- [ ] Teacher Controller & Routes
+- [ ] Teacher Form Requests & Resource
+- [ ] Teacher UI (DataTables + Modal)
+- [ ] Subject assignment functionality
 
-### Phase 5: API Controllers & Routes
-- [ ] Create Form Request validators
-- [ ] Create API Resources for JSON responses
-- [ ] Implement UserController
-- [ ] Implement StudentController
-- [ ] Implement TeacherController
-- [ ] Implement ClassroomController
-- [ ] Implement SubjectController
-- [ ] Define API routes
-- [ ] Setup API middleware & authentication
+### Phase 6: Classroom Management (Feature #4)
+- [ ] Classroom Repository Layer
+- [ ] Classroom Service Layer
+- [ ] Classroom Controller & Routes
+- [ ] Classroom Form Requests & Resource
+- [ ] Classroom UI (DataTables + Modal)
+- [ ] Student assignment functionality
+- [ ] Homeroom teacher assignment
 
-### Phase 6: Testing & Documentation
-- [ ] Unit tests for Services
-- [ ] Integration tests for Repositories
-- [ ] API endpoint tests
-- [ ] Postman/OpenAPI documentation
+### Phase 7: Subject Management (Feature #5)
+- [ ] Subject Repository Layer
+- [ ] Subject Service Layer
+- [ ] Subject Controller & Routes
+- [ ] Subject Form Requests & Resource
+- [ ] Subject UI (DataTables + Modal)
+- [ ] Teacher-Subject linking
 
-### Phase 7: Future Features (Post-MVP)
-- [ ] RFID Attendance API for ESP32
-- [ ] Attendance reporting
-- [ ] Dashboard with statistics
+### Phase 8: Testing & Documentation (Post-MVP Development)
+> Testing dan dokumentasi akan dilakukan setelah semua fitur MVP selesai untuk efisiensi development cycle.
+
+- [ ] Unit tests untuk semua Services
+- [ ] Unit tests untuk semua Repositories
+- [ ] Feature tests untuk web endpoints
+- [ ] Update inline code documentation (PHPDoc)
+- [ ] Create comprehensive README
+
+### Phase 9: Future Features (Post-MVP)
+- [ ] REST API endpoints (untuk mobile/third-party integration)
+- [ ] RFID Attendance API untuk ESP32
+- [ ] Attendance reporting & analytics
+- [ ] Dashboard dengan statistics
 - [ ] Export functionality (PDF, Excel)
-- [ ] Front-end implementation
+- [ ] Advanced search & filtering
 
 ## Code Standards & Best Practices
 
@@ -453,39 +504,61 @@ class StudentController extends Controller
 }
 ```
 
-## API Response Format
+## JSON Response Format
 
-### Success Response
+> Semua AJAX endpoints mengembalikan JSON responses dengan format konsisten
+
+### Success Response (CRUD Operations)
 ```json
 {
     "success": true,
     "message": "Operation successful",
-    "data": { ... }
-}
-```
-
-### Error Response
-```json
-{
-    "success": false,
-    "message": "Error message",
-    "errors": {
-        "field": ["validation error"]
+    "data": {
+        "id": 1,
+        "name": "User Name",
+        "email": "user@example.com",
+        "roles": ["admin"],
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
     }
 }
 ```
 
-### Paginated Response
+### Success Response (Delete Operation)
 ```json
 {
     "success": true,
-    "data": [...],
-    "meta": {
-        "current_page": 1,
-        "per_page": 15,
-        "total": 100,
-        "last_page": 7
+    "message": "User deleted successfully."
+}
+```
+
+### Error Response (Validation)
+```json
+{
+    "message": "The email field is required.",
+    "errors": {
+        "email": ["The email field is required."],
+        "password": ["The password must be at least 6 characters."]
     }
+}
+```
+
+### DataTables Response Format
+```json
+{
+    "draw": 1,
+    "recordsTotal": 100,
+    "recordsFiltered": 50,
+    "data": [
+        {
+            "id": 1,
+            "name": "User Name",
+            "email": "user@example.com",
+            "roles": "admin, teacher",
+            "email_verified_at": "2024-01-01 00:00",
+            "actions": "<button>...</button>"
+        }
+    ]
 }
 ```
 
@@ -520,11 +593,35 @@ Adhere to PSR-12 with 4-space indentation; format PHP with `./vendor/bin/pint`.
 Name controllers and jobs in PascalCase (e.g., `StudentController`, `CreateStudentJob`), while database tables and migrations use snake_case timestamps.
 Front-end scripts follow the Airbnb ESLint rules; run `npx eslint resources/js --fix` and `npx stylelint "resources/css/**/*.scss"` before pushing.
 
-## Testing Guidelines
+## Testing Strategy
 
-Feature and API coverage belongs in `tests/Feature`, with pure logic isolated in `tests/Unit`.
-Run `php artisan test` locally; for focused checks use `phpunit --testsuite=Feature --filter Student`.
-Prefer using model factories and `RefreshDatabase` to keep tests hermetic, and include assertions for emitted events or activity logs when relevant.
+> **Deferred Testing Approach**: Untuk efisiensi development cycle, comprehensive testing akan dilakukan di Phase 8 setelah semua fitur MVP (User, Student, Teacher, Classroom, Subject Management) selesai diimplementasikan.
+
+### Testing Plan (Phase 8)
+
+**Unit Tests** (`tests/Unit/`)
+- Repository tests: Verify database operations, filtering, eager loading
+- Service tests: Business logic, transaction management, data transformation
+
+**Feature Tests** (`tests/Feature/`)
+- Web endpoint tests: Full request/response cycle untuk semua CRUD operations
+- Permission tests: Verify authorization middleware
+- DataTables tests: Server-side processing endpoints
+
+**Testing Commands:**
+```bash
+php artisan test                              # Run all tests
+php artisan test --testsuite=Unit            # Unit tests only
+php artisan test --testsuite=Feature         # Feature tests only
+php artisan test --filter UserServiceTest    # Specific test class
+```
+
+**Best Practices:**
+- Use `RefreshDatabase` trait untuk clean state
+- Use model factories untuk test data
+- Test both happy path dan error scenarios
+- Include assertions untuk database state changes
+- Mock external services jika diperlukan
 
 ## Commit & Pull Request Guidelines
 
@@ -537,19 +634,83 @@ Link the related issue card, list any database or env changes, and note the test
 1. **Always follow Repository-Service Pattern**: Never put business logic in Controllers or Repositories
 2. **Use Type Hints**: All methods should have proper type hints and return types
 3. **Transaction Management**: Use DB::transaction() for operations involving multiple models
-4. **Activity Logging**: Log all important actions using Spatie Activity Log
-5. **Authorization**: Always check permissions before performing actions
-6. **Validation**: Use Form Requests for input validation
-7. **API Resources**: Use Laravel API Resources for consistent JSON responses
-8. **Testing**: Write tests alongside feature implementation
-9. **Code Style**: Follow PSR-12 and Laravel best practices (use Laravel Pint)
-10. **Documentation**: Keep this AGENTS.md updated as features are added
+4. **Authorization**: Always check permissions before performing actions using middleware
+5. **Validation**: Use Form Requests for input validation
+6. **Resources**: Use Laravel API Resources for consistent JSON responses
+7. **Code Style**: Follow PSR-12 and Laravel best practices (use Laravel Pint)
+8. **Documentation**: Keep this AGENTS.md updated as features are added
+9. **Testing Approach**: Unit tests dan feature tests akan ditulis setelah semua fitur MVP selesai (Phase 8) untuk efisiensi development cycle
+10. **UI Pattern**: Gunakan DataTables server-side + Modal forms + SweetAlert2 untuk consistency dengan User Management feature
+
+## Implementation Pattern (Follow for All Features)
+
+Berdasarkan User Management implementation yang sudah completed, ikuti pattern ini untuk fitur selanjutnya:
+
+### 1. Repository Layer
+```php
+// Interface di app/Repositories/Contracts/
+interface EntityRepositoryInterface {
+    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator;
+    public function datatableQuery(array $filters = []): Builder;
+    public function findById(int $id): ?Entity;
+    public function create(array $data): Entity;
+    public function update(Entity $entity, array $data): Entity;
+    public function delete(Entity $entity): void;
+}
+
+// Implementation di app/Repositories/
+class EntityRepository implements EntityRepositoryInterface { ... }
+```
+
+### 2. Service Layer
+```php
+// Di app/Services/
+class EntityService {
+    public function __construct(private readonly EntityRepositoryInterface $repository) {}
+
+    public function create(array $data): Entity {
+        return DB::transaction(function () use ($data) {
+            // Business logic dengan transaction
+        });
+    }
+}
+```
+
+### 3. Controller Layer
+```php
+// Di app/Http/Controllers/admin/
+class EntityController extends Controller {
+    public function __construct(private readonly EntityService $service) {
+        $this->middleware('permission:entities.view')->only(['index', 'show']);
+        // ... other permissions
+    }
+
+    public function index(Request $request) {
+        if ($request->ajax()) {
+            // Return DataTables JSON
+        }
+        return view('...', ['data' => $data]);
+    }
+}
+```
+
+### 4. Validation & Resources
+- Form Requests: `StoreEntityRequest`, `UpdateEntityRequest`
+- Resource: `EntityResource` untuk consistent JSON structure
+
+### 5. UI & JavaScript
+- View: `resources/views/content/pages/admin/entities/index.blade.php`
+- JS Module: `resources/js/admin/entity-management.js`
+- Pattern: DataTables + Modal forms + SweetAlert2 confirmations
 
 ## Next Steps
 
-Tunggu instruksi selanjutnya untuk memulai implementasi MVP features. Prioritas:
-1. Database migrations
-2. Models & relationships
-3. Repository layer
-4. Service layer
-5. API Controllers & Routes
+**Current Status**: User Management ✅ Completed
+
+**Next Priority**: Phase 3 - Database & Models
+1. Create migrations untuk students, teachers, classrooms, subjects, pivot tables
+2. Create Eloquent models dengan relationships
+3. Setup model factories
+4. Create database seeders
+
+Setelah models ready, lanjut ke Phase 4 (Student Management) mengikuti pattern dari User Management.
