@@ -50,6 +50,13 @@
       "icon": "menu-icon icon-base ri ri-group-line",
       "slug": "admin.users",
       "roles": ["admin"]
+    },
+    {
+      "url": "/admin/students",
+      "name": "Students",
+      "icon": "menu-icon icon-base ri ri-graduation-cap-line",
+      "slug": "admin.students",
+      "roles": ["admin"]
     }
   ]
 }

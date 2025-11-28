@@ -41,7 +41,7 @@
                             @csrf
                             <div class="form-floating form-floating-outline mb-5 form-control-validation">
                                 <input type="text" class="form-control" id="email" name="email"
-                                    placeholder="Enter your email" value="demo@demo.com" autofocus />
+                                    placeholder="Enter your email" value="admin@a.com" autofocus />
                                 <label for="email">Email</label>
                             </div>
                             <div class="mb-5">
@@ -49,7 +49,7 @@
                                     <div class="input-group input-group-merge">
                                         <div class="form-floating form-floating-outline">
                                             <input type="password" id="password" class="form-control" name="password"
-                                                placeholder="Kata Sandi" value="demo123456"
+                                                placeholder="Kata Sandi" value="123456"
                                                 aria-describedby="password" />
                                             <label for="password">Kata Sandi</label>
                                         </div>
