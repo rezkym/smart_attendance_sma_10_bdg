@@ -332,10 +332,10 @@ subjects.delete
 - [x] Admin routes dan menu integration
 
 ### Phase 3: Database & Models (Student, Teacher, Classroom, Subject)
-- [ ] Create migrations (students, teachers, classrooms, subjects, pivot tables)
-- [ ] Create Eloquent models with relationships
-- [ ] Setup model factories
-- [ ] Database seeders untuk initial data
+- [x] Create migrations (students, teachers, classrooms, subjects, pivot tables)
+- [x] Create Eloquent models with relationships
+- [ ] Setup model factories _(Teacher factory added; others pending)_
+- [ ] Database seeders untuk initial data _(Subject seeder added)_
 
 ### Phase 4: Student Management (Feature #2)
 - [ ] Student Repository Layer
@@ -346,12 +346,13 @@ subjects.delete
 - [ ] RFID card assignment functionality
 
 ### Phase 5: Teacher Management (Feature #3)
-- [ ] Teacher Repository Layer
-- [ ] Teacher Service Layer
-- [ ] Teacher Controller & Routes
-- [ ] Teacher Form Requests & Resource
-- [ ] Teacher UI (DataTables + Modal)
-- [ ] Subject assignment functionality
+- [x] Teacher Repository Layer
+- [x] Teacher Service Layer
+- [x] Teacher Controller & Routes
+- [x] Teacher Form Requests & Resource
+- [x] Teacher UI (DataTables + Modal)
+- [x] Subject assignment functionality
+- [x] Homeroom assignment (classroom) endpoint & UI
 
 ### Phase 6: Classroom Management (Feature #4)
 - [ ] Classroom Repository Layer
@@ -705,12 +706,8 @@ class EntityController extends Controller {
 
 ## Next Steps
 
-**Current Status**: User Management ✅ Completed
+**Current Status**: User Management ✅ Completed; Teacher Management backend + UI ✅ (DataTables, assign subjects/homeroom); Phase 3 migrations/models ✅ (factories/seeders pending).
 
-**Next Priority**: Phase 3 - Database & Models
-1. Create migrations untuk students, teachers, classrooms, subjects, pivot tables
-2. Create Eloquent models dengan relationships
-3. Setup model factories
-4. Create database seeders
-
-Setelah models ready, lanjut ke Phase 4 (Student Management) mengikuti pattern dari User Management.
+**Next Priority**:
+1. Lengkapi factories & seeders yang tersisa (students/teachers/classrooms/subjects) untuk Phase 3.
+2. Mulai Phase 4 (Student Management) mengikuti pattern User/Teacher modules.

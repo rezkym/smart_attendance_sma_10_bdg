@@ -23,7 +23,7 @@ Route::get('/pages/misc-error', [MiscError::class, 'index'])->name('pages-misc-e
 // Route Go Home to spesific role after
 Route::any('/home', function (Request $request) {
     /** @var \App\Models\User|null $user */
-    $user = $request()->user();
+    $user = $request->user();
 
     if (! $user) {
         return redirect()->route('login');

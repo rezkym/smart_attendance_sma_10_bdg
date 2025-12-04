@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\StudentController;
+use App\Http\Controllers\admin\TeacherController;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -24,4 +25,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
     Route::put('/students/{student}/rfid', [StudentController::class, 'assignRfid'])->name('students.assign-rfid');
     Route::put('/students/{student}/classroom', [StudentController::class, 'assignClassroom'])->name('students.assign-classroom');
+
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+    Route::get('/teachers/available-users', [TeacherController::class, 'getAvailableUsers'])->name('teachers.available-users');
+    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+    Route::get('/teachers/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
+    Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
+    Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
+    Route::put('/teachers/{teacher}/subjects', [TeacherController::class, 'assignSubjects'])->name('teachers.assign-subjects');
+    Route::put('/teachers/{teacher}/classroom', [TeacherController::class, 'assignClassroom'])->name('teachers.assign-classroom');
 });

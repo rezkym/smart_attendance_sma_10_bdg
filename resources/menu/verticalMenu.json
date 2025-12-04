@@ -57,6 +57,13 @@
       "icon": "menu-icon icon-base ri ri-graduation-cap-line",
       "slug": "admin.students",
       "roles": ["admin"]
+    },
+    {
+      "url": "/admin/teachers",
+      "name": "Teachers",
+      "icon": "menu-icon icon-base ri ri-user-star-line",
+      "slug": "admin.teachers",
+      "roles": ["admin"]
     }
   ]
 }
