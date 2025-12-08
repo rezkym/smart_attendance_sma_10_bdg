@@ -9,6 +9,10 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        return view('content.pages.admin.AdminDashboard');
+        $studentCount = \App\Models\Student::count();
+        $teacherCount = \App\Models\Teacher::count();
+        $totalCount = $studentCount + $teacherCount;
+
+        return view('content.pages.admin.AdminDashboard', compact('studentCount', 'teacherCount', 'totalCount'));
     }
 }
