@@ -3,8 +3,8 @@
 ## Fase 1: Independen (Tidak ada dependency)
 - [x] Role & Permission Management *(independen)* ✅
 - [x] User Management *(Role & Permission)* ✅
-- [ ] Academic Year Management *(independen)*
-- [ ] Subject Management *(independen)*
+- [x] Academic Year Management *(independen)* ✅
+- [x] Subject Management *(independen)* ✅
 
 ## Fase 2: Dependency Tingkat 1
 - [ ] Teacher Management *(User)*
