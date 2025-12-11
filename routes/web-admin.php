@@ -1,12 +1,24 @@
 <?php
 
 use App\Http\Controllers\admin\AdminDashboardController;
+use App\Http\Controllers\admin\AcademicYearController;
 use App\Http\Controllers\admin\PermissionController;
 use App\Http\Controllers\admin\RoleController;
+use App\Http\Controllers\admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Users Management - Custom routes before resource
+    Route::get('users/list', [UserController::class, 'list'])->name('users.list');
+    Route::get('users/stats', [UserController::class, 'stats'])->name('users.stats');
+    Route::resource('users', UserController::class)->except(['create', 'edit']);
+
+    // Academic Year Management - Custom routes before resource
+    Route::get('academic-years/list', [AcademicYearController::class, 'list'])->name('academic-years.list');
+    Route::post('academic-years/{academic_year}/set-active', [AcademicYearController::class, 'setActive'])->name('academic-years.set-active');
+    Route::resource('academic-years', AcademicYearController::class)->except(['create', 'edit']);
 
     // Roles Management - Custom routes before resource
     Route::get('access-roles/list', [RoleController::class, 'list'])->name('access-roles.list');
