@@ -42,6 +42,13 @@
       "icon": "menu-icon icon-base ri ri-calendar-line",
       "slug": "admin.academic-years",
       "roles": ["admin"]
+    },
+    {
+      "url": "/admin/subjects",
+      "name": "Subjects",
+      "icon": "menu-icon icon-base ri ri-book-2-line",
+      "slug": "admin.subjects",
+      "roles": ["admin"]
     }
   ]
 }

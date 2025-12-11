@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AcademicYearController;
 use App\Http\Controllers\admin\PermissionController;
 use App\Http\Controllers\admin\RoleController;
+use App\Http\Controllers\admin\SubjectController;
 use App\Http\Controllers\admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('academic-years/list', [AcademicYearController::class, 'list'])->name('academic-years.list');
     Route::post('academic-years/{academic_year}/set-active', [AcademicYearController::class, 'setActive'])->name('academic-years.set-active');
     Route::resource('academic-years', AcademicYearController::class)->except(['create', 'edit']);
+
+    // Subject Management - Custom routes before resource
+    Route::get('subjects/list', [SubjectController::class, 'list'])->name('subjects.list');
+    Route::resource('subjects', SubjectController::class)->except(['create', 'edit']);
 
     // Roles Management - Custom routes before resource
     Route::get('access-roles/list', [RoleController::class, 'list'])->name('access-roles.list');
