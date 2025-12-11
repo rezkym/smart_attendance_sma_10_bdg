@@ -10,6 +10,25 @@
       "icon": "menu-icon icon-base ri ri-dashboard-line",
       "slug": "admin.dashboard",
       "roles": ["admin"]
+    },
+    {
+      "name": "Roles & Permissions",
+      "icon": "menu-icon icon-base ri ri-lock-2-line",
+      "slug": "admin.access",
+      "roles": ["admin"],
+      "submenu": [
+        {
+          "url": "/admin/access-roles",
+          "name": "Roles",
+          "slug": "admin.access-roles"
+        },
+        {
+          "url": "/admin/access-permission",
+          "name": "Permission",
+          "slug": "admin.access-permission"
+        }
+      ]
     }
   ]
 }
+

@@ -1,25 +1,34 @@
 /**
- * App user list (js)
+ * App Access Permission
+ * Permission management with DataTables and CRUD operations
  */
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', function (e) {
-  const dataTablePermissions = document.querySelector('.datatables-permissions'),
-    userList = baseUrl + 'app/user/list';
+document.addEventListener('DOMContentLoaded', function () {
+  const dataTablePermissions = document.querySelector('.datatables-permissions');
+  const addPermissionModal = document.getElementById('addPermissionModal');
+  const addPermissionForm = document.getElementById('addPermissionForm');
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+  // Base URLs
+  const permissionsBaseUrl = '/admin/access-permission';
+
   let dt_permission;
 
-  // Users List datatable
+  // Initialize DataTable
   if (dataTablePermissions) {
     dt_permission = new DataTable(dataTablePermissions, {
-      ajax: assetsPath + 'json/permissions-list.json', // JSON file to add data
+      ajax: {
+        url: `${permissionsBaseUrl}/list`,
+        dataSrc: 'data'
+      },
       columns: [
-        // columns according to JSON
         { data: 'id' },
         { data: 'id' },
         { data: 'name' },
         { data: 'assigned_to' },
-        { data: 'created_date' },
+        { data: 'created_at_formatted' },
         { data: 'id' }
       ],
       columnDefs: [
@@ -30,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           searchable: false,
           responsivePriority: 2,
           targets: 0,
-          render: function (data, type, full, meta) {
+          render: function () {
             return '';
           }
         },
@@ -42,40 +51,43 @@ document.addEventListener('DOMContentLoaded', function (e) {
         {
           // Name
           targets: 2,
-          render: function (data, type, full, meta) {
-            let name = full['name'];
-            return '<span class="text-nowrap text-heading">' + name + '</span>';
+          render: function (data, type, full) {
+            return `<span class="text-nowrap text-heading">${full.name}</span>`;
           }
         },
         {
-          // User Role
+          // Assigned To
           targets: 3,
           orderable: false,
-          render: function (data, type, full, meta) {
-            const assignedTo = full['assigned_to'];
+          render: function (data, type, full) {
+            const assignedTo = full.assigned_to || [];
             let output = '';
-            const roleBadgeObj = {
-              Admin: `<a href="${userList}"><span class="badge rounded-pill bg-label-primary me-4">Administrator</span></a>`,
-              Manager: `<a href="${userList}"><span class="badge rounded-pill bg-label-warning me-4">Manager</span></a>`,
-              Users: `<a href="${userList}"><span class="badge rounded-pill bg-label-success me-4">Users</span></a>`,
-              Support: `<a href="${userList}"><span class="badge rounded-pill bg-label-info me-4">Support</span></a>`,
-              Restricted: `<a href="${userList}"><span class="badge rounded-pill bg-label-danger me-4">Restricted User</span></a>`
+            
+            // UI Configuration: Role-to-color mapping for badge styling only.
+            // This is NOT business logic - safe to modify for visual preferences.
+            const roleBadgeColors = {
+              admin: 'primary',
+              manager: 'warning',
+              user: 'success',
+              teacher: 'info',
+              student: 'secondary'
             };
 
             assignedTo.forEach(role => {
-              output += roleBadgeObj[role] || '';
+              const colorKey = role.toLowerCase();
+              const color = roleBadgeColors[colorKey] || 'primary';
+              output += `<span class="badge rounded-pill bg-label-${color} me-2">${role}</span>`;
             });
 
-            return `<span class="text-nowrap">${output}</span>`;
+            return output || '<span class="text-muted">Not assigned</span>';
           }
         },
         {
-          // remove ordering from Name
+          // Created Date
           targets: 4,
           orderable: false,
-          render: function (data, type, full, meta) {
-            let date = full['created_date'];
-            return '<span class="text-nowrap">' + date + '</span>';
+          render: function (data, type, full) {
+            return `<span class="text-nowrap">${full.created_at_formatted || '-'}</span>`;
           }
         },
         {
@@ -84,27 +96,18 @@ document.addEventListener('DOMContentLoaded', function (e) {
           searchable: false,
           title: 'Actions',
           orderable: false,
-          render: function (data, type, full, meta) {
+          render: function (data, type, full) {
             return `
               <div class="d-flex align-items-center">
-                <span class="text-nowrap">
-                  <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill delete-record text-body waves-effect me-1">
-                    <i class="icon-base ri ri-delete-bin-7-line icon-20px"></i>
-                  </button>
-                  <a href="javascript:;" class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow" data-bs-target="#editPermissionModal" data-bs-toggle="modal" data-bs-dismiss="modal">
-                    <i class="icon-base ri ri-edit-box-line icon-20px"></i>
-                  </a>
-                  <div class="dropdown-menu dropdown-menu-end m-0">
-                    <a href="javascript:;" class="dropdown-item">Edit</a>
-                    <a href="javascript:;" class="dropdown-item">Suspend</a>
-                  </div>
-                </span>
+                <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill delete-permission text-body waves-effect" data-permission-id="${full.id}" data-permission-name="${full.name}">
+                  <i class="icon-base ri ri-delete-bin-7-line icon-20px"></i>
+                </button>
               </div>
             `;
           }
         }
       ],
-      order: [[1, 'asc']],
+      order: [[2, 'asc']],
       layout: {
         topStart: {
           rowClass: 'row mx-2',
@@ -112,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             {
               pageLength: {
                 menu: [10, 25, 50, 100],
-                text: 'Show_MENU_'
+                text: 'Show _MENU_'
               }
             }
           ]
@@ -158,14 +161,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
           display: DataTable.Responsive.display.modal({
             header: function (row) {
               const data = row.data();
-              return 'Details of ' + data['name'];
+              return 'Details of ' + data.name;
             }
           }),
           type: 'column',
           renderer: function (api, rowIdx, columns) {
             const data = columns
               .map(function (col) {
-                return col.title !== '' //? Do not show row in modal popup if title is blank (for check box)
+                return col.title !== ''
                   ? `<tr data-dt-row="${col.rowIndex}" data-dt-column="${col.columnIndex}">
                       <td>${col.title}:</td>
                       <td>${col.data}</td>
@@ -190,10 +193,143 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       }
     });
+
+    // Event delegation for dynamic buttons
+    dataTablePermissions.addEventListener('click', function (e) {
+      // Delete permission
+      if (e.target.closest('.delete-permission')) {
+        const btn = e.target.closest('.delete-permission');
+        const permissionId = btn.getAttribute('data-permission-id');
+        const permissionName = btn.getAttribute('data-permission-name');
+        deletePermission(permissionId, permissionName);
+      }
+    });
   }
 
-  // Filter form control to default size
-  // ? setTimeout used for multilingual table initialization
+  // Add Permission Form Submission
+  if (addPermissionForm) {
+    addPermissionForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      
+      const permissionName = document.getElementById('modalPermissionName')?.value.trim();
+
+      if (!permissionName) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error',
+          text: 'Permission name is required.',
+          customClass: { confirmButton: 'btn btn-primary' },
+          buttonsStyling: false
+        });
+        return;
+      }
+
+      fetch(permissionsBaseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ name: permissionName })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: data.message,
+              customClass: { confirmButton: 'btn btn-primary' },
+              buttonsStyling: false
+            }).then(() => {
+              bootstrap.Modal.getInstance(addPermissionModal).hide();
+              addPermissionForm.reset();
+              dt_permission.ajax.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: data.message || 'Something went wrong.',
+              customClass: { confirmButton: 'btn btn-primary' },
+              buttonsStyling: false
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'An unexpected error occurred.',
+            customClass: { confirmButton: 'btn btn-primary' },
+            buttonsStyling: false
+          });
+        });
+    });
+  }
+
+
+
+  function deletePermission(permissionId, permissionName) {
+    Swal.fire({
+      title: 'Delete Permission?',
+      text: `Are you sure you want to delete "${permissionName}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        confirmButton: 'btn btn-danger me-3',
+        cancelButton: 'btn btn-outline-secondary'
+      },
+      buttonsStyling: false
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch(`${permissionsBaseUrl}/${permissionId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: data.message,
+                customClass: { confirmButton: 'btn btn-primary' },
+                buttonsStyling: false
+              }).then(() => {
+                dt_permission.ajax.reload();
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                customClass: { confirmButton: 'btn btn-primary' },
+                buttonsStyling: false
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'An unexpected error occurred.',
+              customClass: { confirmButton: 'btn btn-primary' },
+              buttonsStyling: false
+            });
+          });
+      }
+    });
+  }
+
+  // Filter form control styling
   setTimeout(() => {
     const elementsToModify = [
       { selector: '.dt-buttons .btn', classToRemove: 'btn-secondary' },
@@ -210,7 +346,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
       { selector: '.dt-layout-full', classToRemove: 'col-md col-12', classToAdd: 'table-responsive' }
     ];
 
-    // Delete record
     elementsToModify.forEach(({ selector, classToRemove, classToAdd }) => {
       document.querySelectorAll(selector).forEach(element => {
         if (classToRemove) {
