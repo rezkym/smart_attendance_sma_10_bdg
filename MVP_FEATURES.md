@@ -7,8 +7,8 @@
 - [x] Subject Management *(independen)* ✅
 
 ## Fase 2: Dependency Tingkat 1
-- [ ] Teacher Management *(User)*
-- [ ] Classroom Management *(independen, akan di-link ke Teacher)*
+- [x] Teacher Management *(User)* ✅
+- [x] Classroom Management *(independen, akan di-link ke Teacher)* ✅
 
 ## Fase 3: Dependency Tingkat 2
 - [ ] Student Management *(User, Classroom)*
