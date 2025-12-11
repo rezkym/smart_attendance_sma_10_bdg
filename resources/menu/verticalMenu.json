@@ -12,25 +12,23 @@
       "roles": ["admin"]
     },
     {
-      "url": "/admin/users",
-      "name": "Users",
-      "icon": "menu-icon icon-base ri ri-group-line",
-      "slug": "admin.users",
-      "roles": ["admin"]
-    },
-    {
-      "url": "/admin/students",
-      "name": "Students",
-      "icon": "menu-icon icon-base ri ri-graduation-cap-line",
-      "slug": "admin.students",
-      "roles": ["admin"]
-    },
-    {
-      "url": "/admin/teachers",
-      "name": "Teachers",
-      "icon": "menu-icon icon-base ri ri-user-star-line",
-      "slug": "admin.teachers",
-      "roles": ["admin"]
+      "name": "Roles & Permissions",
+      "icon": "menu-icon icon-base ri ri-lock-2-line",
+      "slug": "admin.access",
+      "roles": ["admin"],
+      "submenu": [
+        {
+          "url": "/admin/access-roles",
+          "name": "Roles",
+          "slug": "admin.access-roles"
+        },
+        {
+          "url": "/admin/access-permission",
+          "name": "Permission",
+          "slug": "admin.access-permission"
+        }
+      ]
     }
   ]
 }
+

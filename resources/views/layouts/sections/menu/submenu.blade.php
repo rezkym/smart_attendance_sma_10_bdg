@@ -26,7 +26,7 @@
             }
         } elseif ($matchesSlug($slugs)) {
             $activeClass = $active;
-        } elseif (isset($submenu->submenu ?? null)) {
+        } elseif (isset($submenu->submenu)) {
             foreach ($submenu->submenu as $nested) {
                 if (isset($isMenuActive) && $isMenuActive($nested)) {
                     $activeClass = $active;

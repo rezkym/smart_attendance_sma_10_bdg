@@ -1,113 +1,167 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreUserRequest;
-use App\Http\Requests\Admin\UpdateUserRequest;
-use App\Http\Requests\Admin\UpdateUserRolesRequest;
-use App\Http\Resources\UserResource;
-use App\Models\User;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Services\RoleService;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
     public function __construct(
-        private readonly UserService $userService
-    ) {
-        $this->middleware('permission:users.view')->only(['index', 'show']);
-        $this->middleware('permission:users.create')->only(['store']);
-        $this->middleware('permission:users.update')->only(['update']);
-        $this->middleware('permission:users.delete')->only(['destroy']);
-        $this->middleware('permission:users.assign-roles')->only(['assignRoles']);
+        protected UserService $userService,
+        protected RoleService $roleService
+    ) {}
+
+    /**
+     * Display users list page
+     */
+    public function index(): View
+    {
+        $roles = $this->roleService->getAllRolesWithDetails();
+        $stats = $this->userService->getUserStats();
+
+        return view('content.pages.admin.users', compact('roles', 'stats'));
     }
 
-    public function index(Request $request)
+    /**
+     * DataTables server-side data
+     */
+    public function list(Request $request): JsonResponse
     {
-        if ($request->ajax()) {
-            $query = $this->userService->datatableQuery($request->only('role'));
+        $query = $this->userService->getDataTableQuery();
 
-            return DataTables::eloquent($query)
-                ->addIndexColumn()
-                ->addColumn('roles', fn (User $user) => $user->roles->pluck('name')->join(', '))
-                ->editColumn('email_verified_at', fn (User $user) => $user->email_verified_at?->format('Y-m-d H:i') ?? '-')
-                ->addColumn('actions', fn (User $user) => view('content.pages.admin.users.partials.actions', compact('user'))->render())
-                ->filter(function ($query) use ($request) {
-                    $search = $request->input('search.value');
+        return DataTables::eloquent($query)
+            ->addColumn('roles_list', function ($user) {
+                return $user->roles->pluck('name')->toArray();
+            })
+            ->addColumn('actions', function ($user) {
+                return $user->id;
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
 
-                    if ($search) {
-                        $query->where(function ($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%")
-                                ->orWhereHas('roles', fn ($roleQuery) => $roleQuery->where('name', 'like', "%{$search}%"));
-                        });
-                    }
-                })
-                ->rawColumns(['actions'])
-                ->toJson();
-        }
+    /**
+     * Get user statistics for dashboard cards
+     */
+    public function stats(): JsonResponse
+    {
+        $stats = $this->userService->getUserStats();
 
-        $roles = Role::query()->orderBy('name')->pluck('name');
-
-        return view('content.pages.admin.users.index', [
-            'roles' => $roles,
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
         ]);
     }
 
+    /**
+     * Store a new user
+     */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = $this->userService->create($request->validated());
+        try {
+            $user = $this->userService->createUser(
+                [
+                    'name' => $request->validated('name'),
+                    'email' => $request->validated('email'),
+                    'password' => $request->validated('password'),
+                ],
+                $request->validated('roles', [])
+            );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully.',
-            'data' => new UserResource($user),
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => "User '{$user->name}' created successfully.",
+                'data' => $user->load('roles'),
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
-    public function show(User $user): JsonResponse
+    /**
+     * Get user data for editing
+     */
+    public function show(int $user): JsonResponse
     {
-        $user->load('roles');
+        $userData = $this->userService->getUserById($user);
+
+        if ($userData === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,
-            'data' => new UserResource($user),
+            'data' => [
+                'id' => $userData->id,
+                'name' => $userData->name,
+                'email' => $userData->email,
+                'roles' => $userData->roles->pluck('name')->toArray(),
+            ],
         ]);
     }
 
-    public function update(UpdateUserRequest $request, User $user): JsonResponse
+    /**
+     * Update an existing user
+     */
+    public function update(UpdateUserRequest $request, int $user): JsonResponse
     {
-        $updatedUser = $this->userService->update($user, $request->validated());
+        try {
+            $updatedUser = $this->userService->updateUser(
+                $user,
+                [
+                    'name' => $request->validated('name'),
+                    'email' => $request->validated('email'),
+                    'password' => $request->validated('password'),
+                ],
+                $request->validated('roles', [])
+            );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully.',
-            'data' => new UserResource($updatedUser),
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => "User '{$updatedUser->name}' updated successfully.",
+                'data' => $updatedUser,
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
-    public function destroy(User $user): JsonResponse
+    /**
+     * Delete a user
+     */
+    public function destroy(int $user): JsonResponse
     {
-        $this->userService->delete($user);
+        try {
+            $this->userService->deleteUser($user);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User deleted successfully.',
-        ], 200);
-    }
-
-    public function assignRoles(UpdateUserRolesRequest $request, User $user): JsonResponse
-    {
-        $updatedUser = $this->userService->syncRoles($user, $request->validated('roles'));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Roles updated successfully.',
-            'data' => new UserResource($updatedUser),
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted successfully.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

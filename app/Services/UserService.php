@@ -1,84 +1,139 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository
-    ) {
+        protected UserRepositoryInterface $userRepository
+    ) {}
+
+    /**
+     * Get all users with roles
+     *
+     * @return Collection<int, User>
+     */
+    public function getAllUsersWithRoles(): Collection
+    {
+        return $this->userRepository->getAllUsersWithRoles();
     }
 
-    public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    /**
+     * Get user by ID with roles
+     */
+    public function getUserById(int $userId): ?User
     {
-        return $this->userRepository->paginate($perPage, $filters);
+        return $this->userRepository->findByIdWithRoles($userId);
     }
 
-    public function datatableQuery(array $filters = []): Builder
+    /**
+     * Create a new user with roles
+     *
+     * @param array{name: string, email: string, password: string} $userData
+     * @param array<int, string> $roleNames
+     */
+    public function createUser(array $userData, array $roleNames = []): User
     {
-        return $this->userRepository->datatableQuery($filters);
-    }
+        return DB::transaction(function () use ($userData, $roleNames) {
+            // Password is hashed automatically via User model's password cast
+            $user = $this->userRepository->create($userData);
 
-    public function findById(int $id): ?User
-    {
-        return $this->userRepository->findById($id);
-    }
-
-    public function create(array $data): User
-    {
-        return DB::transaction(function () use ($data) {
-            $roles = Arr::pull($data, 'roles', []);
-
-            $user = $this->userRepository->create($data);
-
-            if (! empty($roles)) {
-                $user->syncRoles($roles);
+            if (filled($roleNames)) {
+                $this->userRepository->syncRoles($user, $roleNames);
             }
 
-            return $user->load('roles');
+            return $user->fresh()->load('roles');
         });
     }
 
-    public function update(User $user, array $data): User
+    /**
+     * Update user and sync roles
+     *
+     * @param array{name?: string, email?: string, password?: string} $userData
+     * @param array<int, string> $roleNames
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function updateUser(int $userId, array $userData, array $roleNames = []): User
     {
-        return DB::transaction(function () use ($user, $data) {
-            $roles = Arr::pull($data, 'roles', null);
+        $user = $this->userRepository->findById($userId);
 
-            if (array_key_exists('password', $data) && $data['password'] === null) {
-                unset($data['password']);
+        if ($user === null) {
+            throw new \InvalidArgumentException("User with ID {$userId} not found.");
+        }
+
+        return DB::transaction(function () use ($user, $userData, $roleNames) {
+            // Only update password if provided and not empty
+            if (blank($userData['password'] ?? null)) {
+                unset($userData['password']);
             }
 
-            $updatedUser = $this->userRepository->update($user, $data);
-
-            if (is_array($roles)) {
-                $updatedUser->syncRoles($roles);
+            if (filled($userData)) {
+                $this->userRepository->update($user, $userData);
             }
 
-            return $updatedUser->load('roles');
+            $this->userRepository->syncRoles($user, $roleNames);
+
+            return $user->fresh()->load('roles');
         });
     }
 
-    public function delete(User $user): void
+    /**
+     * Delete a user
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function deleteUser(int $userId): bool
     {
-        DB::transaction(function () use ($user) {
-            $user->syncRoles([]);
-            $this->userRepository->delete($user);
-        });
+        $user = $this->userRepository->findById($userId);
+
+        if ($user === null) {
+            throw new \InvalidArgumentException("User with ID {$userId} not found.");
+        }
+
+        // Prevent deleting yourself
+        if (Auth::id() === $user->id) {
+            throw new \InvalidArgumentException('You cannot delete your own account.');
+        }
+
+        // Prevent deleting if user is the last admin
+        if ($user->hasRole('admin')) {
+            $adminCount = User::role('admin')->count();
+            if ($adminCount <= 1) {
+                throw new \InvalidArgumentException('Cannot delete the last admin user.');
+            }
+        }
+
+        return $this->userRepository->delete($user);
     }
 
-    public function syncRoles(User $user, array $roles): User
+    /**
+     * Get user statistics for dashboard cards
+     *
+     * @return array{total_users: int}
+     */
+    public function getUserStats(): array
     {
-        return DB::transaction(function () use ($user, $roles) {
-            $user->syncRoles($roles);
+        return [
+            'total_users' => $this->userRepository->getTotalUsersCount(),
+        ];
+    }
 
-            return $user->load('roles');
-        });
+    /**
+     * Get DataTables query builder for users
+     */
+    public function getDataTableQuery(): Builder
+    {
+        return $this->userRepository->getDataTableQuery();
     }
 }

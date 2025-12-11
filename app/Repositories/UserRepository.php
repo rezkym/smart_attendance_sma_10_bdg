@@ -1,64 +1,83 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function __construct(
+        protected User $model
+    ) {}
+
+    public function getAllUsers(): Collection
     {
-        $query = User::query()->with('roles')->orderByDesc('id');
-
-        if (! empty($filters['search'])) {
-            $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        return $query->paginate($perPage);
+        return $this->model->newQuery()->get();
     }
 
-    public function datatableQuery(array $filters = []): Builder
+    public function getAllUsersWithRoles(): Collection
     {
-        $query = User::query()
+        return $this->model->newQuery()
             ->with('roles')
-            ->select('users.*');
-
-        if (! empty($filters['role'])) {
-            $query->whereHas('roles', function (Builder $roleQuery) use ($filters) {
-                $roleQuery->where('name', $filters['role']);
-            });
-        }
-
-        return $query;
+            ->get();
     }
 
-    public function findById(int $id): ?User
+    public function findById(int $userId): ?User
     {
-        return User::with('roles')->find($id);
+        return $this->model->newQuery()->find($userId);
+    }
+
+    public function findByIdWithRoles(int $userId): ?User
+    {
+        return $this->model->newQuery()
+            ->with('roles')
+            ->find($userId);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return $this->model->newQuery()
+            ->where('email', $email)
+            ->first();
     }
 
     public function create(array $data): User
     {
-        return User::create($data);
+        return $this->model->newQuery()->create($data);
     }
 
     public function update(User $user, array $data): User
     {
-        $user->fill($data);
-        $user->save();
+        $user->update($data);
 
-        return $user;
+        return $user->fresh();
     }
 
-    public function delete(User $user): void
+    public function delete(User $user): bool
     {
-        $user->delete();
+        return (bool) $user->delete();
+    }
+
+    public function syncRoles(User $user, array $roleNames): User
+    {
+        $user->syncRoles($roleNames);
+
+        return $user->fresh()->load('roles');
+    }
+
+    public function getTotalUsersCount(): int
+    {
+        return $this->model->newQuery()->count();
+    }
+
+    public function getDataTableQuery(): Builder
+    {
+        return $this->model->newQuery()
+            ->with('roles');
     }
 }

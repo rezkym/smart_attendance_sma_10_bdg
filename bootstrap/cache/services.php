@@ -45,6 +45,7 @@
     41 => 'App\\Providers\\AppServiceProvider',
     42 => 'App\\Providers\\FortifyServiceProvider',
     43 => 'App\\Providers\\MenuServiceProvider',
+    44 => 'App\\Providers\\RepositoryServiceProvider',
   ),
   'eager' => 
   array (
@@ -76,6 +77,7 @@
     25 => 'App\\Providers\\AppServiceProvider',
     26 => 'App\\Providers\\FortifyServiceProvider',
     27 => 'App\\Providers\\MenuServiceProvider',
+    28 => 'App\\Providers\\RepositoryServiceProvider',
   ),
   'deferred' => 
   array (
