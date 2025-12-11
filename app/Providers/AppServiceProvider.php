@@ -8,10 +8,12 @@ use App\Repositories\Contracts\SubjectRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\TeacherRepositoryInterface;
+use App\Repositories\Contracts\ClassroomRepositoryInterface;
 use App\Repositories\SubjectRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\StudentRepository;
 use App\Repositories\TeacherRepository;
+use App\Repositories\ClassroomRepository;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Vite;
 
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TeacherRepositoryInterface::class, TeacherRepository::class);
         $this->app->bind(AcademicYearRepositoryInterface::class, AcademicYearRepository::class);
         $this->app->bind(SubjectRepositoryInterface::class, SubjectRepository::class);
+        $this->app->bind(ClassroomRepositoryInterface::class, ClassroomRepository::class);
     }
 
     /**
