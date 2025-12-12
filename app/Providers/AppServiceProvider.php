@@ -3,12 +3,20 @@
 namespace App\Providers;
 
 use App\Repositories\AcademicYearRepository;
+use App\Repositories\AttendanceRepository;
 use App\Repositories\Contracts\AcademicYearRepositoryInterface;
+use App\Repositories\Contracts\AttendanceRepositoryInterface;
+use App\Repositories\Contracts\IotDeviceRepositoryInterface;
+use App\Repositories\Contracts\IotLogRepositoryInterface;
+use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\Repositories\Contracts\SubjectRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\TeacherRepositoryInterface;
 use App\Repositories\Contracts\ClassroomRepositoryInterface;
+use App\Repositories\IotDeviceRepository;
+use App\Repositories\IotLogRepository;
+use App\Repositories\ScheduleRepository;
 use App\Repositories\SubjectRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\StudentRepository;
@@ -30,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AcademicYearRepositoryInterface::class, AcademicYearRepository::class);
         $this->app->bind(SubjectRepositoryInterface::class, SubjectRepository::class);
         $this->app->bind(ClassroomRepositoryInterface::class, ClassroomRepository::class);
+        $this->app->bind(ScheduleRepositoryInterface::class, ScheduleRepository::class);
+        $this->app->bind(AttendanceRepositoryInterface::class, AttendanceRepository::class);
+        $this->app->bind(IotDeviceRepositoryInterface::class, IotDeviceRepository::class);
+        $this->app->bind(IotLogRepositoryInterface::class, IotLogRepository::class);
     }
 
     /**

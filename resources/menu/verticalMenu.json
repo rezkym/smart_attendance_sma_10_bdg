@@ -80,6 +80,53 @@
       "icon": "menu-icon icon-base ri ri-graduation-cap-line",
       "slug": "admin.students",
       "permissions": ["students.view"]
+    },
+    {
+      "url": "/admin/schedules",
+      "name": "Schedules",
+      "icon": "menu-icon icon-base ri ri-calendar-schedule-line",
+      "slug": "admin.schedules",
+      "permissions": ["schedules.view"]
+    },
+    {
+      "menuHeader": "Attendance",
+      "permissions": ["attendances.view"]
+    },
+    {
+      "url": "/admin/attendances",
+      "name": "Attendances",
+      "icon": "menu-icon icon-base ri ri-calendar-check-line",
+      "slug": "admin.attendances",
+      "permissions": ["attendances.view"]
+    },
+    {
+      "menuHeader": "Reports",
+      "permissions": ["reports.view"]
+    },
+    {
+      "url": "/admin/reports/attendance",
+      "name": "Attendance Report",
+      "icon": "menu-icon icon-base ri ri-bar-chart-box-line",
+      "slug": "admin.reports.attendance",
+      "permissions": ["reports.view"]
+    },
+    {
+      "menuHeader": "IoT Management",
+      "permissions": ["iot-devices.view", "iot-logs.view"]
+    },
+    {
+      "url": "/admin/iot-devices",
+      "name": "IoT Devices",
+      "icon": "menu-icon icon-base ri ri-router-line",
+      "slug": "admin.iot-devices",
+      "permissions": ["iot-devices.view"]
+    },
+    {
+      "url": "/admin/iot-logs",
+      "name": "IoT Logs",
+      "icon": "menu-icon icon-base ri ri-file-list-3-line",
+      "slug": "admin.iot-logs",
+      "permissions": ["iot-logs.view"]
     }
   ]
 }

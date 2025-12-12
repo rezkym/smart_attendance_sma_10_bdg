@@ -53,7 +53,29 @@
         "subjects.update",
         "subjects.delete",
         "subjects.assign-teachers",
-        "subjects.assign-classrooms"
+        "subjects.assign-classrooms",
+
+        "schedules.view",
+        "schedules.create",
+        "schedules.update",
+        "schedules.delete",
+
+        "attendances.view",
+        "attendances.create",
+        "attendances.update",
+        "attendances.delete",
+
+        "reports.view",
+        "reports.export",
+
+        "iot-devices.view",
+        "iot-devices.create",
+        "iot-devices.update",
+        "iot-devices.delete",
+        "iot-devices.regenerate-key",
+
+        "iot-logs.view",
+        "iot-logs.export"
       ]
     },
     {
@@ -64,7 +86,11 @@
         "students.view",
         "teachers.view",
         "classrooms.view",
-        "subjects.view"
+        "subjects.view",
+        "schedules.view",
+        "attendances.view",
+        "attendances.create",
+        "attendances.update"
       ]
     },
     {
@@ -74,7 +100,9 @@
         "dashboard.view",
         "students.view",
         "classrooms.view",
-        "subjects.view"
+        "subjects.view",
+        "schedules.view",
+        "attendances.view"
       ]
     }
   ]

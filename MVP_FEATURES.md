@@ -15,15 +15,15 @@
 - [x] Classroom Assignment *(Classroom, Teacher - assign homeroom teacher)* ✅
 
 ## Fase 4: Dependency Tingkat 3
-- [ ] Schedule/Timetable Management *(Classroom, Subject, Teacher, Academic Year)*
+- [x] Schedule/Timetable Management *(Classroom, Subject, Teacher, Academic Year)* ✅
 
 ## Fase 5: Core Feature
-- [ ] Attendance Records *(Student, Classroom, Schedule, Academic Year)*
-- [ ] Manual Attendance Entry *(Student, Classroom)*
+- [x] Attendance Records *(Student, Classroom, Schedule, Academic Year)* ✅
+- [x] Manual Attendance Entry *(Student, Classroom)* ✅
 
 ## Fase 6: Reporting & Dashboard
-- [ ] Attendance Report *(Attendance Records, Student, Classroom)*
-- [ ] Dashboard Statistics *(semua data di atas)*
+- [x] Attendance Report *(Attendance Records, Student, Classroom)* ✅
+- [x] Dashboard Statistics *(semua data di atas)* ✅
 
 ---
 

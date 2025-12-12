@@ -49,6 +49,28 @@
     { "name": "subjects.update", "guard_name": "web" },
     { "name": "subjects.delete", "guard_name": "web" },
     { "name": "subjects.assign-teachers", "guard_name": "web" },
-    { "name": "subjects.assign-classrooms", "guard_name": "web" }
+    { "name": "subjects.assign-classrooms", "guard_name": "web" },
+
+    { "name": "schedules.view", "guard_name": "web" },
+    { "name": "schedules.create", "guard_name": "web" },
+    { "name": "schedules.update", "guard_name": "web" },
+    { "name": "schedules.delete", "guard_name": "web" },
+
+    { "name": "attendances.view", "guard_name": "web" },
+    { "name": "attendances.create", "guard_name": "web" },
+    { "name": "attendances.update", "guard_name": "web" },
+    { "name": "attendances.delete", "guard_name": "web" },
+
+    { "name": "reports.view", "guard_name": "web" },
+    { "name": "reports.export", "guard_name": "web" },
+
+    { "name": "iot-devices.view", "guard_name": "web" },
+    { "name": "iot-devices.create", "guard_name": "web" },
+    { "name": "iot-devices.update", "guard_name": "web" },
+    { "name": "iot-devices.delete", "guard_name": "web" },
+    { "name": "iot-devices.regenerate-key", "guard_name": "web" },
+
+    { "name": "iot-logs.view", "guard_name": "web" },
+    { "name": "iot-logs.export", "guard_name": "web" }
   ]
 }
