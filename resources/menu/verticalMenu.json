@@ -9,23 +9,29 @@
       "name": "Dashboard",
       "icon": "menu-icon icon-base ri ri-dashboard-line",
       "slug": "admin.dashboard",
-      "roles": ["admin"]
+      "permissions": ["dashboard.view"]
+    },
+    {
+      "menuHeader": "Access Control",
+      "permissions": ["roles.view", "permissions.view", "users.view"]
     },
     {
       "name": "Roles & Permissions",
       "icon": "menu-icon icon-base ri ri-lock-2-line",
       "slug": "admin.access",
-      "roles": ["admin"],
+      "permissions": ["roles.view", "permissions.view"],
       "submenu": [
         {
           "url": "/admin/access-roles",
           "name": "Roles",
-          "slug": "admin.access-roles"
+          "slug": "admin.access-roles",
+          "permissions": ["roles.view"]
         },
         {
           "url": "/admin/access-permission",
           "name": "Permission",
-          "slug": "admin.access-permission"
+          "slug": "admin.access-permission",
+          "permissions": ["permissions.view"]
         }
       ]
     },
@@ -34,36 +40,46 @@
       "name": "Users",
       "icon": "menu-icon icon-base ri ri-user-line",
       "slug": "admin.users",
-      "roles": ["admin"]
+      "permissions": ["users.view"]
+    },
+    {
+      "menuHeader": "Master Data",
+      "permissions": ["academic-years.view", "subjects.view", "classrooms.view", "teachers.view", "students.view"]
     },
     {
       "url": "/admin/academic-years",
       "name": "Academic Years",
       "icon": "menu-icon icon-base ri ri-calendar-line",
       "slug": "admin.academic-years",
-      "roles": ["admin"]
+      "permissions": ["academic-years.view"]
     },
     {
       "url": "/admin/subjects",
       "name": "Subjects",
       "icon": "menu-icon icon-base ri ri-book-2-line",
       "slug": "admin.subjects",
-      "roles": ["admin"]
-    },
-    {
-      "url": "/admin/teachers",
-      "name": "Teachers",
-      "icon": "menu-icon icon-base ri ri-user-star-line",
-      "slug": "admin.teachers",
-      "roles": ["admin"]
+      "permissions": ["subjects.view"]
     },
     {
       "url": "/admin/classrooms",
       "name": "Classrooms",
       "icon": "menu-icon icon-base ri ri-door-line",
       "slug": "admin.classrooms",
-      "roles": ["admin"]
+      "permissions": ["classrooms.view"]
+    },
+    {
+      "url": "/admin/teachers",
+      "name": "Teachers",
+      "icon": "menu-icon icon-base ri ri-user-star-line",
+      "slug": "admin.teachers",
+      "permissions": ["teachers.view"]
+    },
+    {
+      "url": "/admin/students",
+      "name": "Students",
+      "icon": "menu-icon icon-base ri ri-graduation-cap-line",
+      "slug": "admin.students",
+      "permissions": ["students.view"]
     }
   ]
 }
-

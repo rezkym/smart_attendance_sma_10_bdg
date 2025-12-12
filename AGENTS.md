@@ -8,6 +8,7 @@
 - **NO FORCED SOLUTIONS**: Agent is **STRICTLY FORBIDDEN** from writing hacky, forced, or "quick fix" code
 - **NO TEMPORARY SOLUTIONS**: Agent must **NEVER** create temporary workarounds that will become technical debt
 - **NO HARDCODING**: Agent must **NEVER** hardcode values that should come from database, config, or other data sources. If data doesn't exist, **ASK** user to create the proper migration/schema first. Do not fake, mock, or hardcode data to make things "work"
+- **MINIMAL SCOPE**: Only edit files directly required for the task. If a file outside task scope needs modification, **ASK first**
 - **ALWAYS PROPOSE ALTERNATIVES**: When rejecting a request, provide a proper alternative solution that follows best practices
 
 ### When to Reject a Request
@@ -38,8 +39,9 @@
 
 ### 2. Architecture: Repository-Service Pattern (Laravel 12)
 - **Controllers**: Handle HTTP requests, validation, and response formatting ONLY. NO business logic
-- **Services**: Handle ALL business logic, transactions, and data transformation
-- **Repositories**: Handle ALL database queries and persistence
+- **Services**: Handle business logic, transactions, and orchestration. **NO direct Model/Eloquent calls** - delegate to Repositories
+- **Repositories**: Handle ALL database queries. **This is the ONLY layer that touches Eloquent**
+- **Config Files**: Static data (permissions, menus, constants) MUST be in config/JSON files, NOT hardcoded in PHP code
 - **NO logic in Controllers**: Never put Eloquent queries or complex logic in Controllers. Delegate to Services
 
 ### 3. Naming Conventions

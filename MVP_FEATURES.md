@@ -11,8 +11,9 @@
 - [x] Classroom Management *(independen, akan di-link ke Teacher)* ✅
 
 ## Fase 3: Dependency Tingkat 2
-- [ ] Student Management *(User, Classroom)*
-- [ ] Classroom Assignment *(Classroom, Teacher - assign homeroom teacher)*
+- [x] Student Management *(User, Classroom)* ✅
+
+
 
 ## Fase 4: Dependency Tingkat 3
 - [ ] Schedule/Timetable Management *(Classroom, Subject, Teacher, Academic Year)*

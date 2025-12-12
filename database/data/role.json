@@ -4,11 +4,27 @@
       "name": "admin",
       "guard_name": "web",
       "permissions": [
+        "dashboard.view",
+
         "users.view",
         "users.create",
         "users.update",
         "users.delete",
         "users.assign-roles",
+
+        "roles.view",
+        "roles.create",
+        "roles.update",
+        "roles.delete",
+
+        "permissions.view",
+        "permissions.create",
+        "permissions.delete",
+
+        "academic-years.view",
+        "academic-years.create",
+        "academic-years.update",
+        "academic-years.delete",
 
         "students.view",
         "students.create",
@@ -44,6 +60,7 @@
       "name": "teacher",
       "guard_name": "web",
       "permissions": [
+        "dashboard.view",
         "students.view",
         "teachers.view",
         "classrooms.view",
@@ -54,6 +71,7 @@
       "name": "student",
       "guard_name": "web",
       "permissions": [
+        "dashboard.view",
         "students.view",
         "classrooms.view",
         "subjects.view"

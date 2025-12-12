@@ -1,10 +1,26 @@
 {
   "permissions": [
+    { "name": "dashboard.view", "guard_name": "web" },
+
     { "name": "users.view", "guard_name": "web" },
     { "name": "users.create", "guard_name": "web" },
     { "name": "users.update", "guard_name": "web" },
     { "name": "users.delete", "guard_name": "web" },
     { "name": "users.assign-roles", "guard_name": "web" },
+
+    { "name": "roles.view", "guard_name": "web" },
+    { "name": "roles.create", "guard_name": "web" },
+    { "name": "roles.update", "guard_name": "web" },
+    { "name": "roles.delete", "guard_name": "web" },
+
+    { "name": "permissions.view", "guard_name": "web" },
+    { "name": "permissions.create", "guard_name": "web" },
+    { "name": "permissions.delete", "guard_name": "web" },
+
+    { "name": "academic-years.view", "guard_name": "web" },
+    { "name": "academic-years.create", "guard_name": "web" },
+    { "name": "academic-years.update", "guard_name": "web" },
+    { "name": "academic-years.delete", "guard_name": "web" },
 
     { "name": "students.view", "guard_name": "web" },
     { "name": "students.create", "guard_name": "web" },
