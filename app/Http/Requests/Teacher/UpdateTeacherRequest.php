@@ -22,22 +22,12 @@ class UpdateTeacherRequest extends FormRequest
         $teacherId = $this->route('teacher');
 
         return [
-            // Only teacher fields - user data is not editable
+            // Only teacher fields - user data is not editable here
             'nip' => [
                 'nullable',
                 'string',
                 'max:30',
                 Rule::unique('teachers', 'nip')->ignore($teacherId),
-            ],
-            'phone' => [
-                'nullable',
-                'string',
-                'max:20',
-            ],
-            'address' => [
-                'nullable',
-                'string',
-                'max:1000',
             ],
             'is_active' => [
                 'nullable',
@@ -54,7 +44,7 @@ class UpdateTeacherRequest extends FormRequest
         return [
             'nip.unique' => 'This NIP is already registered.',
             'nip.max' => 'NIP must not exceed 30 characters.',
-            'phone.max' => 'Phone number must not exceed 20 characters.',
         ];
     }
 }
+

@@ -38,10 +38,13 @@ class TeacherController extends Controller
 
         return DataTables::eloquent($query)
             ->addColumn('user_name', function ($teacher) {
-                return $teacher->user->name ?? '';
+                return $teacher->user?->display_name ?? '';
             })
             ->addColumn('user_email', function ($teacher) {
-                return $teacher->user->email ?? '';
+                return $teacher->user?->email ?? '';
+            })
+            ->addColumn('user_phone', function ($teacher) {
+                return $teacher->user?->phone_number ?? '';
             })
             ->addColumn('status', function ($teacher) {
                 return $teacher->is_active;
@@ -65,7 +68,7 @@ class TeacherController extends Controller
             'data' => $users->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'name' => $user->display_name,
                     'email' => $user->email,
                 ];
             }),
@@ -81,24 +84,13 @@ class TeacherController extends Controller
             $teacher = $this->teacherService->createTeacher([
                 'user_id' => $request->validated('user_id'),
                 'nip' => $request->validated('nip'),
-                'phone' => $request->validated('phone'),
-                'address' => $request->validated('address'),
                 'is_active' => $request->validated('is_active', true),
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => "Teacher '{$teacher->user->name}' created successfully.",
-                'data' => [
-                    'id' => $teacher->id,
-                    'user_id' => $teacher->user_id,
-                    'name' => $teacher->user->name,
-                    'email' => $teacher->user->email,
-                    'nip' => $teacher->nip,
-                    'phone' => $teacher->phone,
-                    'address' => $teacher->address,
-                    'is_active' => $teacher->is_active,
-                ],
+                'message' => "Teacher '{$teacher->display_name}' created successfully.",
+                'data' => $this->formatTeacherResponse($teacher),
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -124,16 +116,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $teacherData->id,
-                'user_id' => $teacherData->user_id,
-                'name' => $teacherData->user->name,
-                'email' => $teacherData->user->email,
-                'nip' => $teacherData->nip,
-                'phone' => $teacherData->phone,
-                'address' => $teacherData->address,
-                'is_active' => $teacherData->is_active,
-            ],
+            'data' => $this->formatTeacherResponse($teacherData),
         ]);
     }
 
@@ -147,25 +130,14 @@ class TeacherController extends Controller
                 $teacher,
                 [
                     'nip' => $request->validated('nip'),
-                    'phone' => $request->validated('phone'),
-                    'address' => $request->validated('address'),
                     'is_active' => $request->validated('is_active', true),
                 ]
             );
 
             return response()->json([
                 'success' => true,
-                'message' => "Teacher '{$updatedTeacher->user->name}' updated successfully.",
-                'data' => [
-                    'id' => $updatedTeacher->id,
-                    'user_id' => $updatedTeacher->user_id,
-                    'name' => $updatedTeacher->user->name,
-                    'email' => $updatedTeacher->user->email,
-                    'nip' => $updatedTeacher->nip,
-                    'phone' => $updatedTeacher->phone,
-                    'address' => $updatedTeacher->address,
-                    'is_active' => $updatedTeacher->is_active,
-                ],
+                'message' => "Teacher '{$updatedTeacher->display_name}' updated successfully.",
+                'data' => $this->formatTeacherResponse($updatedTeacher),
             ]);
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -193,5 +165,34 @@ class TeacherController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Format teacher data for API response including user profile.
+     *
+     * @return array<string, mixed>
+     */
+    private function formatTeacherResponse(\App\Models\Teacher $teacher): array
+    {
+        $user = $teacher->user;
+
+        return [
+            'id' => $teacher->id,
+            'user_id' => $teacher->user_id,
+            // Teacher specific fields
+            'nip' => $teacher->nip,
+            'is_active' => $teacher->is_active,
+            // User account fields
+            'name' => $user?->name,
+            'email' => $user?->email,
+            // User profile fields (from users table)
+            'full_name' => $user?->full_name,
+            'gender' => $user?->gender?->value,
+            'gender_label' => $user?->gender?->label(),
+            'birth_place' => $user?->birth_place,
+            'birth_date' => $user?->birth_date?->format('Y-m-d'),
+            'address' => $user?->address,
+            'phone_number' => $user?->phone_number,
+        ];
     }
 }

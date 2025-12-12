@@ -113,81 +113,98 @@
         <form class="add-new-student pt-0" id="addNewStudentForm">
           <input type="hidden" id="student_id" name="student_id" value="" />
 
-          <h6 class="mb-4">Student Identifiers</h6>
+          <!-- User Selection (Add Mode) -->
+          <div id="user-select-group" class="mb-5">
+            <label class="form-label" for="add-student-user">Select User with Student Role <span class="text-danger">*</span></label>
+            <select id="add-student-user" name="user_id" class="form-select select2">
+              <option value="">Select a user...</option>
+            </select>
+            <small class="text-muted">Only users with 'student' role who don't have a profile yet</small>
+          </div>
+
+          <!-- User Info Display (Edit Mode) -->
+          <div id="user-info-group" class="mb-5" style="display: none;">
+            <div class="card bg-lighter mb-3">
+              <div class="card-body py-3">
+                <h6 class="mb-3 text-muted text-uppercase fw-semibold small">User Account</h6>
+                <div class="mb-2">
+                  <small class="text-muted d-block">Name</small>
+                  <span id="display-user-name" class="fw-medium"></span>
+                </div>
+                <div class="mb-2">
+                  <small class="text-muted d-block">Email</small>
+                  <span id="display-user-email" class="text-muted"></span>
+                </div>
+              </div>
+            </div>
+            <div class="card bg-lighter">
+              <div class="card-body py-3">
+                <h6 class="mb-3 text-muted text-uppercase fw-semibold small">Profile Information</h6>
+                <div class="row">
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Gender</small>
+                    <span id="display-user-gender">-</span>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Phone</small>
+                    <span id="display-user-phone">-</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Birth Place</small>
+                    <span id="display-user-birthplace">-</span>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Birth Date</small>
+                    <span id="display-user-birthdate">-</span>
+                  </div>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Address</small>
+                  <span id="display-user-address">-</span>
+                </div>
+              </div>
+            </div>
+            <small class="text-muted mt-2 d-block">
+              <i class="ri ri-information-line"></i> To edit profile data, go to <a href="/admin/users">Users Management</a>
+            </small>
+          </div>
+
+          <hr class="my-4">
+          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">Student Identifiers</h6>
 
           <div class="form-floating form-floating-outline mb-5">
             <input type="text" class="form-control" id="add-student-nisn" placeholder="0012345678" name="nisn" maxlength="20" required />
-            <label for="add-student-nisn">NISN *</label>
+            <label for="add-student-nisn">NISN <span class="text-danger">*</span></label>
           </div>
 
           <div class="form-floating form-floating-outline mb-5">
             <input type="text" class="form-control" id="add-student-nis" placeholder="12345" name="nis" maxlength="20" required />
-            <label for="add-student-nis">NIS *</label>
+            <label for="add-student-nis">NIS <span class="text-danger">*</span></label>
           </div>
 
           <hr class="my-4">
-          <h6 class="mb-4">Personal Information</h6>
+          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">Academic Information</h6>
 
           <div class="mb-5">
-            <label for="add-student-user" class="form-label">User Account (Optional)</label>
-            <select id="add-student-user" name="user_id" class="select2 form-select" data-allow-clear="true">
-              <option value="">No User Account</option>
-            </select>
-            <small class="text-muted">Link to user account for login access</small>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-student-full-name" placeholder="Ahmad Fauzi" name="full_name" maxlength="100" required />
-            <label for="add-student-full-name">Full Name *</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <select id="add-student-gender" name="gender" class="form-select" required>
-              <option value="" disabled selected>Select Gender</option>
-              <option value="L">Laki-laki</option>
-              <option value="P">Perempuan</option>
-            </select>
-            <label for="add-student-gender">Gender *</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
+            <label for="add-student-classroom" class="form-label">Classroom</label>
             <select id="add-student-classroom" name="classroom_id" class="select2 form-select">
               <option value="">No Classroom Assigned</option>
             </select>
-            <label for="add-student-classroom">Classroom</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-student-birth-place" placeholder="Bandung" name="birth_place" maxlength="100" />
-            <label for="add-student-birth-place">Birth Place</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="date" class="form-control" id="add-student-birth-date" name="birth_date" />
-            <label for="add-student-birth-date">Birth Date</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <textarea class="form-control" id="add-student-address" placeholder="Jl. Merdeka No. 123" name="address" style="height: 80px"></textarea>
-            <label for="add-student-address">Address</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-student-phone" placeholder="081234567890" name="phone_number" maxlength="20" />
-            <label for="add-student-phone">Phone Number</label>
-          </div>
-
-          <hr class="my-4">
-          <h6 class="mb-4">Additional Information</h6>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-student-rfid" placeholder="A1B2C3D4E5" name="rfid_card_number" maxlength="50" />
-            <label for="add-student-rfid">RFID Card Number</label>
           </div>
 
           <div class="form-floating form-floating-outline mb-5">
             <input type="date" class="form-control" id="add-student-enrollment-date" name="enrollment_date" />
             <label for="add-student-enrollment-date">Enrollment Date</label>
+          </div>
+
+          <hr class="my-4">
+          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">Additional Information</h6>
+
+          <div class="form-floating form-floating-outline mb-5">
+            <input type="text" class="form-control" id="add-student-rfid" placeholder="A1B2C3D4E5" name="rfid_card_number" maxlength="50" />
+            <label for="add-student-rfid">RFID Card Number</label>
           </div>
 
           <div class="form-floating form-floating-outline mb-5">
@@ -202,10 +219,13 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
-          <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
+          <div class="pt-3">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
+            <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
+          </div>
         </form>
       </div>
     </div>
   </div>
 @endsection
+

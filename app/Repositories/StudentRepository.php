@@ -123,7 +123,7 @@ class StudentRepository implements StudentRepositoryInterface
             ->with(['user', 'classroom'])
             ->inClassroom($classroomId)
             ->active()
-            ->orderBy('full_name')
+            ->orderBy('id')
             ->get();
     }
 }

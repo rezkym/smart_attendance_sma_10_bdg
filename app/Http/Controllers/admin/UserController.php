@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\admin;
 
+use App\Enums\Gender;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
@@ -28,8 +29,9 @@ class UserController extends Controller
     {
         $roles = $this->roleService->getAllRolesWithDetails();
         $stats = $this->userService->getUserStats();
+        $genders = Gender::toArray();
 
-        return view('content.pages.admin.users', compact('roles', 'stats'));
+        return view('content.pages.admin.users', compact('roles', 'stats', 'genders'));
     }
 
     /**
@@ -72,6 +74,12 @@ class UserController extends Controller
             $user = $this->userService->createUser(
                 [
                     'name' => $request->validated('name'),
+                    'full_name' => $request->validated('full_name'),
+                    'gender' => $request->validated('gender'),
+                    'birth_place' => $request->validated('birth_place'),
+                    'birth_date' => $request->validated('birth_date'),
+                    'address' => $request->validated('address'),
+                    'phone_number' => $request->validated('phone_number'),
                     'email' => $request->validated('email'),
                     'password' => $request->validated('password'),
                 ],
@@ -80,7 +88,7 @@ class UserController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "User '{$user->name}' created successfully.",
+                'message' => "User '{$user->display_name}' created successfully.",
                 'data' => $user->load('roles'),
             ], 201);
         } catch (\Exception $e) {
@@ -110,6 +118,12 @@ class UserController extends Controller
             'data' => [
                 'id' => $userData->id,
                 'name' => $userData->name,
+                'full_name' => $userData->full_name,
+                'gender' => $userData->gender?->value,
+                'birth_place' => $userData->birth_place,
+                'birth_date' => $userData->birth_date?->format('Y-m-d'),
+                'address' => $userData->address,
+                'phone_number' => $userData->phone_number,
                 'email' => $userData->email,
                 'roles' => $userData->roles->pluck('name')->toArray(),
             ],
@@ -126,6 +140,12 @@ class UserController extends Controller
                 $user,
                 [
                     'name' => $request->validated('name'),
+                    'full_name' => $request->validated('full_name'),
+                    'gender' => $request->validated('gender'),
+                    'birth_place' => $request->validated('birth_place'),
+                    'birth_date' => $request->validated('birth_date'),
+                    'address' => $request->validated('address'),
+                    'phone_number' => $request->validated('phone_number'),
                     'email' => $request->validated('email'),
                     'password' => $request->validated('password'),
                 ],
@@ -134,7 +154,7 @@ class UserController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "User '{$updatedUser->name}' updated successfully.",
+                'message' => "User '{$updatedUser->display_name}' updated successfully.",
                 'data' => $updatedUser,
             ]);
         } catch (\InvalidArgumentException $e) {

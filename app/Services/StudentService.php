@@ -83,14 +83,35 @@ class StudentService
     }
 
     /**
+     * Get users with student role who don't have a student profile yet.
+     *
+     * @return Collection<int, User>
+     */
+    public function getAvailableUsers(): Collection
+    {
+        return $this->userRepository->getUsersByRoleWithoutRelation('student', 'student');
+    }
+
+    /**
      * Create a new student.
      *
-     * @param array<string, mixed> $data
+     * @param array{user_id: int, nisn: string, nis: string, classroom_id?: int|null, rfid_card_number?: string|null, enrollment_date?: string|null, is_active?: bool, notes?: string|null} $data
      *
      * @throws \InvalidArgumentException
      */
     public function createStudent(array $data): Student
     {
+        $user = User::find($data['user_id']);
+
+        if ($user === null) {
+            throw new \InvalidArgumentException('Selected user not found.');
+        }
+
+        // Check if user already has a student profile
+        if ($user->student !== null) {
+            throw new \InvalidArgumentException('This user already has a student profile.');
+        }
+
         // Check NISN uniqueness
         if ($this->studentRepository->findByNisn($data['nisn']) !== null) {
             throw new \InvalidArgumentException('NISN already registered.');
@@ -114,7 +135,7 @@ class StudentService
     /**
      * Update student data.
      *
-     * @param array<string, mixed> $data
+     * @param array{nisn?: string, nis?: string, classroom_id?: int|null, rfid_card_number?: string|null, enrollment_date?: string|null, is_active?: bool, notes?: string|null} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -203,28 +224,5 @@ class StudentService
     {
         return $this->studentRepository->getDataTableQuery();
     }
-
-    /**
-     * Get available users for student assignment (users not already linked to a student).
-     *
-     * @return Collection<int, User>
-     */
-    public function getAvailableUsers(?int $excludeStudentId = null): Collection
-    {
-        $allUsers = $this->userRepository->getAllUsers();
-        
-        // Get user IDs already linked to students
-        $linkedUserIds = Student::query()
-            ->whereNotNull('user_id')
-            ->when($excludeStudentId, function ($query) use ($excludeStudentId) {
-                return $query->where('id', '!=', $excludeStudentId);
-            })
-            ->pluck('user_id')
-            ->toArray();
-        
-        // Filter out users already linked
-        return $allUsers->filter(function ($user) use ($linkedUserIds) {
-            return !in_array($user->id, $linkedUserIds);
-        })->values();
-    }
 }
+

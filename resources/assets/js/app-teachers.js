@@ -11,14 +11,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const teacherIdInput = document.getElementById('teacher_id');
   const teacherUserSelect = document.getElementById('add-teacher-user');
   const teacherNipInput = document.getElementById('add-teacher-nip');
-  const teacherPhoneInput = document.getElementById('add-teacher-phone');
-  const teacherAddressInput = document.getElementById('add-teacher-address');
   const teacherIsActiveInput = document.getElementById('add-teacher-is-active');
   const offcanvasTitle = document.getElementById('offcanvasAddTeacherLabel');
   const userSelectGroup = document.getElementById('user-select-group');
   const userInfoGroup = document.getElementById('user-info-group');
   const displayUserName = document.getElementById('display-user-name');
   const displayUserEmail = document.getElementById('display-user-email');
+  const displayUserGender = document.getElementById('display-user-gender');
+  const displayUserPhone = document.getElementById('display-user-phone');
+  const displayUserBirthplace = document.getElementById('display-user-birthplace');
+  const displayUserBirthdate = document.getElementById('display-user-birthdate');
+  const displayUserAddress = document.getElementById('display-user-address');
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const dtTeacherTable = document.querySelector('.datatables-teachers');
 
@@ -44,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch(`${teachersBaseUrl}/available-users`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        Accept: 'application/json'
       }
     })
       .then(response => response.json())
@@ -82,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 'user_name' },
         { data: 'user_email' },
         { data: 'nip' },
-        { data: 'phone' },
+        { data: 'user_phone' },
         { data: 'status' },
         { data: 'actions' }
       ],
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
           targets: 5,
           render: function (data, type, full) {
-            return full.phone || '-';
+            return full.user_phone || '-';
           }
         },
         {
@@ -186,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
           type: 'column',
           renderer: function (api, rowIdx, columns) {
             const data = columns
-              .map(col => col.title !== '' ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : '')
+              .map(col => (col.title !== '' ? `<tr><td>${col.title}:</td><td>${col.data}</td></tr>` : ''))
               .join('');
             if (data) {
               const div = document.createElement('div');
@@ -238,8 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const id = teacherIdInput?.value;
       const userId = $(teacherUserSelect).val();
       const nip = teacherNipInput?.value.trim();
-      const phone = teacherPhoneInput?.value.trim();
-      const address = teacherAddressInput?.value.trim();
       const isActive = teacherIsActiveInput?.checked || false;
 
       // Validation for add mode
@@ -253,8 +254,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const payload = {
         nip: nip || null,
-        phone: phone || null,
-        address: address || null,
         is_active: isActive
       };
 
@@ -268,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': csrfToken,
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
         body: JSON.stringify(payload)
       })
@@ -300,8 +299,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (addNewTeacherForm) addNewTeacherForm.reset();
     if (teacherIdInput) teacherIdInput.value = '';
     if (teacherNipInput) teacherNipInput.value = '';
-    if (teacherPhoneInput) teacherPhoneInput.value = '';
-    if (teacherAddressInput) teacherAddressInput.value = '';
     if (teacherIsActiveInput) teacherIsActiveInput.checked = true;
     if (offcanvasTitle) offcanvasTitle.textContent = 'Add Teacher';
 
@@ -310,29 +307,47 @@ document.addEventListener('DOMContentLoaded', function () {
     if (userSelectGroup) userSelectGroup.style.display = 'block';
     if (userInfoGroup) userInfoGroup.style.display = 'none';
     $(teacherUserSelect).val('').trigger('change');
+
+    // Reset profile display
+    if (displayUserName) displayUserName.textContent = '';
+    if (displayUserEmail) displayUserEmail.textContent = '';
+    if (displayUserGender) displayUserGender.textContent = '-';
+    if (displayUserPhone) displayUserPhone.textContent = '-';
+    if (displayUserBirthplace) displayUserBirthplace.textContent = '-';
+    if (displayUserBirthdate) displayUserBirthdate.textContent = '-';
+    if (displayUserAddress) displayUserAddress.textContent = '-';
   }
 
   function loadTeacherData(id) {
     fetch(`${teachersBaseUrl}/${id}`, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' }
     })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
           isEditMode = true;
+
+          // Teacher fields
           if (teacherIdInput) teacherIdInput.value = data.data.id;
           if (teacherNipInput) teacherNipInput.value = data.data.nip || '';
-          if (teacherPhoneInput) teacherPhoneInput.value = data.data.phone || '';
-          if (teacherAddressInput) teacherAddressInput.value = data.data.address || '';
           if (teacherIsActiveInput) teacherIsActiveInput.checked = data.data.is_active;
           if (offcanvasTitle) offcanvasTitle.textContent = 'Edit Teacher';
 
           // Show user info, hide select
           if (userSelectGroup) userSelectGroup.style.display = 'none';
           if (userInfoGroup) userInfoGroup.style.display = 'block';
-          if (displayUserName) displayUserName.textContent = data.data.name;
-          if (displayUserEmail) displayUserEmail.textContent = data.data.email;
+
+          // User account display
+          if (displayUserName) displayUserName.textContent = data.data.full_name || data.data.name || '';
+          if (displayUserEmail) displayUserEmail.textContent = data.data.email || '';
+
+          // User profile display
+          if (displayUserGender) displayUserGender.textContent = data.data.gender_label || '-';
+          if (displayUserPhone) displayUserPhone.textContent = data.data.phone_number || '-';
+          if (displayUserBirthplace) displayUserBirthplace.textContent = data.data.birth_place || '-';
+          if (displayUserBirthdate) displayUserBirthdate.textContent = data.data.birth_date || '-';
+          if (displayUserAddress) displayUserAddress.textContent = data.data.address || '-';
 
           const offcanvas = new bootstrap.Offcanvas(offcanvasAddTeacher);
           offcanvas.show();
@@ -359,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (result.isConfirmed) {
         fetch(`${teachersBaseUrl}/${id}`, {
           method: 'DELETE',
-          headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+          headers: { 'X-CSRF-TOKEN': csrfToken, Accept: 'application/json' }
         })
           .then(response => response.json())
           .then(data => {
@@ -395,8 +410,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const elementsToModify = [
       { selector: '.dt-length', classToAdd: 'my-md-5 my-0 me-lg-2 me-md-1 me-2' },
       { selector: '.dt-search', classToRemove: 'mt-5', classToAdd: 'mb-sm-5 mb-0' },
-      { selector: '.dt-layout-start', classToAdd: 'mt-5 mt-md-0 px-lg-5 pe-0 ps-2 d-flex justify-content-center', classToRemove: 'justify-content-between' },
-      { selector: '.dt-layout-end', classToRemove: 'justify-content-between', classToAdd: 'justify-content-md-between justify-content-center d-flex' },
+      {
+        selector: '.dt-layout-start',
+        classToAdd: 'mt-5 mt-md-0 px-lg-5 pe-0 ps-2 d-flex justify-content-center',
+        classToRemove: 'justify-content-between'
+      },
+      {
+        selector: '.dt-layout-end',
+        classToRemove: 'justify-content-between',
+        classToAdd: 'justify-content-md-between justify-content-center d-flex'
+      },
       { selector: '.dt-layout-table', classToRemove: 'row mt-2' },
       { selector: '.dt-layout-full', classToRemove: 'col-md col-12', classToAdd: 'table-responsive' }
     ];
@@ -408,3 +431,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, 100);
 });
+

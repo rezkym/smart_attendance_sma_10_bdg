@@ -29,4 +29,17 @@ enum Gender: string
     {
         return array_column(self::cases(), 'value');
     }
+
+    /**
+     * Get all genders as array for dropdown options.
+     *
+     * @return array<string, string>
+     */
+    public static function toArray(): array
+    {
+        return [
+            self::MALE->value => self::MALE->label(),
+            self::FEMALE->value => self::FEMALE->label(),
+        ];
+    }
 }

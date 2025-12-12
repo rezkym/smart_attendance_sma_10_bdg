@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\User;
 
+use App\Enums\Gender;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -25,6 +26,35 @@ class StoreUserRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
+            ],
+            'full_name' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'gender' => [
+                'nullable',
+                'string',
+                Rule::enum(Gender::class),
+            ],
+            'birth_place' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'birth_date' => [
+                'nullable',
+                'date',
+                'before:today',
+            ],
+            'address' => [
+                'nullable',
+                'string',
+            ],
+            'phone_number' => [
+                'nullable',
+                'string',
+                'max:20',
             ],
             'email' => [
                 'required',
@@ -57,6 +87,11 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name.required' => 'Name is required.',
+            'full_name.max' => 'Full name must not exceed 100 characters.',
+            'gender.enum' => 'Invalid gender value.',
+            'birth_place.max' => 'Birth place must not exceed 100 characters.',
+            'birth_date.before' => 'Birth date must be before today.',
+            'phone_number.max' => 'Phone number must not exceed 20 characters.',
             'email.required' => 'Email is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already registered.',
@@ -67,3 +102,4 @@ class StoreUserRequest extends FormRequest
         ];
     }
 }
+

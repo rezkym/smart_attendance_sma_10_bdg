@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Repositories\Contracts\TeacherRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 class TeacherService
 {
     public function __construct(
-        protected TeacherRepositoryInterface $teacherRepository
+        protected TeacherRepositoryInterface $teacherRepository,
+        protected UserRepositoryInterface $userRepository
     ) {}
 
     /**
@@ -48,20 +50,17 @@ class TeacherService
     /**
      * Get users with teacher role who don't have a teacher profile yet
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     * @return Collection<int, User>
      */
-    public function getAvailableUsers(): \Illuminate\Database\Eloquent\Collection
+    public function getAvailableUsers(): Collection
     {
-        return User::role('teacher')
-            ->whereDoesntHave('teacher')
-            ->orderBy('name')
-            ->get();
+        return $this->userRepository->getUsersByRoleWithoutRelation('teacher', 'teacher');
     }
 
     /**
      * Create a new teacher profile for existing user
      *
-     * @param array{user_id: int, nip?: string|null, phone?: string|null, address?: string|null, is_active?: bool} $data
+     * @param array{user_id: int, nip?: string|null, is_active?: bool} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -82,16 +81,14 @@ class TeacherService
         return $this->teacherRepository->create([
             'user_id' => $user->id,
             'nip' => $data['nip'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ]);
     }
 
     /**
-     * Update teacher profile data only (user data is not editable)
+     * Update teacher profile data only (user data is not editable here)
      *
-     * @param array{nip?: string|null, phone?: string|null, address?: string|null, is_active?: bool} $data
+     * @param array{nip?: string|null, is_active?: bool} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -107,12 +104,6 @@ class TeacherService
         $teacherData = [];
         if (array_key_exists('nip', $data)) {
             $teacherData['nip'] = $data['nip'];
-        }
-        if (array_key_exists('phone', $data)) {
-            $teacherData['phone'] = $data['phone'];
-        }
-        if (array_key_exists('address', $data)) {
-            $teacherData['address'] = $data['address'];
         }
         if (isset($data['is_active'])) {
             $teacherData['is_active'] = $data['is_active'];

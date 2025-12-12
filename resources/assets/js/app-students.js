@@ -11,19 +11,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const studentIdInput = document.getElementById('student_id');
   const studentNisnInput = document.getElementById('add-student-nisn');
   const studentNisInput = document.getElementById('add-student-nis');
-  const studentFullNameInput = document.getElementById('add-student-full-name');
-  const studentGenderSelect = document.getElementById('add-student-gender');
   const studentClassroomSelect = document.getElementById('add-student-classroom');
-  const studentBirthPlaceInput = document.getElementById('add-student-birth-place');
-  const studentBirthDateInput = document.getElementById('add-student-birth-date');
-  const studentAddressInput = document.getElementById('add-student-address');
-  const studentPhoneInput = document.getElementById('add-student-phone');
   const studentRfidInput = document.getElementById('add-student-rfid');
   const studentEnrollmentDateInput = document.getElementById('add-student-enrollment-date');
   const studentNotesInput = document.getElementById('add-student-notes');
   const studentIsActiveInput = document.getElementById('add-student-is-active');
   const studentUserSelect = document.getElementById('add-student-user');
   const offcanvasTitle = document.getElementById('offcanvasAddStudentLabel');
+  const userSelectGroup = document.getElementById('user-select-group');
+  const userInfoGroup = document.getElementById('user-info-group');
+  const displayUserName = document.getElementById('display-user-name');
+  const displayUserEmail = document.getElementById('display-user-email');
+  const displayUserGender = document.getElementById('display-user-gender');
+  const displayUserPhone = document.getElementById('display-user-phone');
+  const displayUserBirthplace = document.getElementById('display-user-birthplace');
+  const displayUserBirthdate = document.getElementById('display-user-birthdate');
+  const displayUserAddress = document.getElementById('display-user-address');
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const dtStudentTable = document.querySelector('.datatables-students');
 
@@ -32,24 +35,25 @@ document.addEventListener('DOMContentLoaded', function () {
   let isEditMode = false;
   let select2Initialized = false;
 
-  // Initialize Select2 for classroom dropdown
+  // Initialize Select2 for classroom and user dropdowns
   function initSelect2() {
-    if (studentClassroomSelect && !select2Initialized) {
-      $(studentClassroomSelect).select2({
-        dropdownParent: $('#offcanvasAddStudent'),
-        placeholder: 'Select a classroom...',
-        allowClear: true
-      });
-      
-      // Initialize user select2
-      if (studentUserSelect) {
-        $(studentUserSelect).select2({
+    if (!select2Initialized) {
+      if (studentClassroomSelect) {
+        $(studentClassroomSelect).select2({
           dropdownParent: $('#offcanvasAddStudent'),
-          placeholder: 'Select a user account...',
+          placeholder: 'Select a classroom...',
           allowClear: true
         });
       }
-      
+
+      if (studentUserSelect) {
+        $(studentUserSelect).select2({
+          dropdownParent: $('#offcanvasAddStudent'),
+          placeholder: 'Select a user...',
+          allowClear: true
+        });
+      }
+
       select2Initialized = true;
     }
   }
@@ -58,18 +62,14 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadAvailableClassrooms() {
     fetch(`${studentsBaseUrl}/available-classrooms`, {
       method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      }
+      headers: { Accept: 'application/json' }
     })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // Clear existing options
           $(studentClassroomSelect).empty();
           $(studentClassroomSelect).append(new Option('No Classroom Assigned', '', true, true));
 
-          // Add classrooms grouped by grade level
           data.data.forEach(classroom => {
             const option = new Option(`${classroom.name} (Grade ${classroom.grade_level})`, classroom.id, false, false);
             $(studentClassroomSelect).append(option);
@@ -83,14 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  // Load available users for Select2
-  function loadAvailableUsers(excludeStudentId = null, selectedUserId = null) {
-    let url = `${studentsBaseUrl}/available-users`;
-    if (excludeStudentId) {
-      url += `?exclude_student=${excludeStudentId}`;
-    }
-    
-    fetch(url, {
+  // Load available users for Select2 (users with student role without a profile)
+  function loadAvailableUsers() {
+    fetch(`${studentsBaseUrl}/available-users`, {
       method: 'GET',
       headers: { Accept: 'application/json' }
     })
@@ -98,11 +93,10 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(data => {
         if (data.success) {
           $(studentUserSelect).empty();
-          $(studentUserSelect).append(new Option('No User Account', '', true, true));
+          $(studentUserSelect).append(new Option('Select a user...', '', true, true));
 
           data.data.forEach(user => {
-            const isSelected = selectedUserId && selectedUserId == user.id;
-            const option = new Option(`${user.name} (${user.email})`, user.id, isSelected, isSelected);
+            const option = new Option(`${user.name} (${user.email})`, user.id, false, false);
             $(studentUserSelect).append(option);
           });
 
@@ -126,9 +120,9 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 'id' },
         { data: 'id' },
         { data: 'nisn' },
-        { data: 'full_name' },
+        { data: 'user_name' },
         { data: 'classroom_name' },
-        { data: 'gender_label' },
+        { data: 'user_gender' },
         { data: 'status' },
         { data: 'actions' }
       ],
@@ -158,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
           targets: 3,
           responsivePriority: 1,
           render: function (data, type, full) {
-            return `<span class="fw-medium">${full.full_name || ''}</span>`;
+            return `<span class="fw-medium">${full.user_name || ''}</span>`;
           }
         },
         {
@@ -170,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
           targets: 5,
           render: function (data, type, full) {
-            const genderLabel = full.gender_label || '';
+            const genderLabel = full.user_gender || '';
             if (genderLabel === 'Laki-laki') {
               return '<span class="badge rounded-pill bg-label-primary">Laki-laki</span>';
             }
@@ -200,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-student" data-id="${full.id}">
                   <i class="icon-base ri ri-edit-box-line icon-22px"></i>
                 </a>
-                <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-student" data-id="${full.id}" data-name="${full.full_name}">
+                <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-student" data-id="${full.id}" data-name="${full.user_name}">
                   <i class="icon-base ri ri-delete-bin-7-line icon-22px"></i>
                 </a>
               </div>
@@ -232,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
         details: {
           display: DataTable.Responsive.display.modal({
             header: function (row) {
-              return 'Details of ' + row.data().full_name;
+              return 'Details of ' + row.data().user_name;
             }
           }),
           type: 'column',
@@ -257,8 +251,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (offcanvasAddStudent) {
     offcanvasAddStudent.addEventListener('show.bs.offcanvas', function () {
       initSelect2();
-      loadAvailableClassrooms();
-      loadAvailableUsers();
+      if (!isEditMode) {
+        loadAvailableClassrooms();
+        loadAvailableUsers();
+      }
     });
 
     offcanvasAddStudent.addEventListener('hidden.bs.offcanvas', function () {
@@ -287,23 +283,23 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
 
       const id = studentIdInput?.value;
+      const userId = $(studentUserSelect).val();
       const nisn = studentNisnInput?.value.trim();
       const nis = studentNisInput?.value.trim();
-      const fullName = studentFullNameInput?.value.trim();
-      const gender = studentGenderSelect?.value;
       const classroomId = $(studentClassroomSelect).val();
-      const birthPlace = studentBirthPlaceInput?.value.trim();
-      const birthDate = studentBirthDateInput?.value;
-      const address = studentAddressInput?.value.trim();
-      const phoneNumber = studentPhoneInput?.value.trim();
       const rfidCardNumber = studentRfidInput?.value.trim();
       const enrollmentDate = studentEnrollmentDateInput?.value;
       const notes = studentNotesInput?.value.trim();
       const isActive = studentIsActiveInput?.checked || false;
 
-      // Basic validation
-      if (!nisn || !nis || !fullName || !gender) {
-        showAlert('error', 'Validation Error', 'Please fill in all required fields (NISN, NIS, Full Name, Gender).');
+      // Validation for add mode
+      if (!isEditMode && !userId) {
+        showAlert('error', 'Validation Error', 'Please select a user.');
+        return;
+      }
+
+      if (!nisn || !nis) {
+        showAlert('error', 'Validation Error', 'Please fill in NISN and NIS.');
         return;
       }
 
@@ -313,19 +309,17 @@ document.addEventListener('DOMContentLoaded', function () {
       const payload = {
         nisn: nisn,
         nis: nis,
-        full_name: fullName,
-        gender: gender,
-        user_id: $(studentUserSelect).val() || null,
         classroom_id: classroomId || null,
-        birth_place: birthPlace || null,
-        birth_date: birthDate || null,
-        address: address || null,
-        phone_number: phoneNumber || null,
         rfid_card_number: rfidCardNumber || null,
         enrollment_date: enrollmentDate || null,
         notes: notes || null,
         is_active: isActive
       };
+
+      // Only include user_id for create
+      if (!isEditMode) {
+        payload.user_id = parseInt(userId);
+      }
 
       fetch(url, {
         method: method,
@@ -365,12 +359,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (studentIdInput) studentIdInput.value = '';
     if (studentNisnInput) studentNisnInput.value = '';
     if (studentNisInput) studentNisInput.value = '';
-    if (studentFullNameInput) studentFullNameInput.value = '';
-    if (studentGenderSelect) studentGenderSelect.value = '';
-    if (studentBirthPlaceInput) studentBirthPlaceInput.value = '';
-    if (studentBirthDateInput) studentBirthDateInput.value = '';
-    if (studentAddressInput) studentAddressInput.value = '';
-    if (studentPhoneInput) studentPhoneInput.value = '';
     if (studentRfidInput) studentRfidInput.value = '';
     if (studentEnrollmentDateInput) studentEnrollmentDateInput.value = '';
     if (studentNotesInput) studentNotesInput.value = '';
@@ -381,8 +369,19 @@ document.addEventListener('DOMContentLoaded', function () {
     $(studentClassroomSelect).val('').trigger('change');
     $(studentUserSelect).val('').trigger('change');
 
-    // Reset to add mode
+    // Reset to add mode UI
     isEditMode = false;
+    if (userSelectGroup) userSelectGroup.style.display = 'block';
+    if (userInfoGroup) userInfoGroup.style.display = 'none';
+
+    // Reset profile display
+    if (displayUserName) displayUserName.textContent = '';
+    if (displayUserEmail) displayUserEmail.textContent = '';
+    if (displayUserGender) displayUserGender.textContent = '-';
+    if (displayUserPhone) displayUserPhone.textContent = '-';
+    if (displayUserBirthplace) displayUserBirthplace.textContent = '-';
+    if (displayUserBirthdate) displayUserBirthdate.textContent = '-';
+    if (displayUserAddress) displayUserAddress.textContent = '-';
   }
 
   function loadStudentData(id) {
@@ -394,24 +393,34 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(data => {
         if (data.success) {
           isEditMode = true;
+
+          // Student fields
           if (studentIdInput) studentIdInput.value = data.data.id;
           if (studentNisnInput) studentNisnInput.value = data.data.nisn || '';
           if (studentNisInput) studentNisInput.value = data.data.nis || '';
-          if (studentFullNameInput) studentFullNameInput.value = data.data.full_name || '';
-          if (studentGenderSelect) studentGenderSelect.value = data.data.gender || '';
-          if (studentBirthPlaceInput) studentBirthPlaceInput.value = data.data.birth_place || '';
-          if (studentBirthDateInput) studentBirthDateInput.value = data.data.birth_date || '';
-          if (studentAddressInput) studentAddressInput.value = data.data.address || '';
-          if (studentPhoneInput) studentPhoneInput.value = data.data.phone_number || '';
           if (studentRfidInput) studentRfidInput.value = data.data.rfid_card_number || '';
           if (studentEnrollmentDateInput) studentEnrollmentDateInput.value = data.data.enrollment_date || '';
           if (studentNotesInput) studentNotesInput.value = data.data.notes || '';
           if (studentIsActiveInput) studentIsActiveInput.checked = data.data.is_active;
           if (offcanvasTitle) offcanvasTitle.textContent = 'Edit Student';
 
-          // Load classrooms first, then set value
+          // Show user info, hide select
+          if (userSelectGroup) userSelectGroup.style.display = 'none';
+          if (userInfoGroup) userInfoGroup.style.display = 'block';
+
+          // User account display
+          if (displayUserName) displayUserName.textContent = data.data.full_name || data.data.name || '';
+          if (displayUserEmail) displayUserEmail.textContent = data.data.email || '';
+
+          // User profile display
+          if (displayUserGender) displayUserGender.textContent = data.data.gender_label || '-';
+          if (displayUserPhone) displayUserPhone.textContent = data.data.phone_number || '-';
+          if (displayUserBirthplace) displayUserBirthplace.textContent = data.data.birth_place || '-';
+          if (displayUserBirthdate) displayUserBirthdate.textContent = data.data.birth_date || '-';
+          if (displayUserAddress) displayUserAddress.textContent = data.data.address || '-';
+
+          // Load classrooms and set value
           loadAvailableClassrooms();
-          loadAvailableUsers(data.data.id, data.data.user_id);
           setTimeout(() => {
             if (data.data.classroom_id) {
               $(studentClassroomSelect).val(data.data.classroom_id).trigger('change');
@@ -433,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function deleteStudent(id, name) {
     Swal.fire({
       title: 'Delete Student?',
-      text: `Are you sure you want to delete student "${name}"? This action cannot be undone.`,
+      text: `Are you sure you want to delete student "${name}"? The user account will remain but lose the student role.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
@@ -500,3 +509,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, 100);
 });
+

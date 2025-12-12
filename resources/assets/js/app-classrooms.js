@@ -9,13 +9,13 @@ $(function () {
   let borderColor, bodyBg, headingColor;
 
   if (isDarkStyle) {
-    borderColor = config.colors_dark.borderColor;
-    bodyBg = config.colors_dark.bodyBg;
-    headingColor = config.colors_dark.headingColor;
+    borderColor = config?.colors_dark?.borderColor || '#3b3f5c';
+    bodyBg = config?.colors_dark?.bodyBg || '#25293c';
+    headingColor = config?.colors_dark?.headingColor || '#d5d6dc';
   } else {
-    borderColor = config.colors.borderColor;
-    bodyBg = config.colors.bodyBg;
-    headingColor = config.colors.headingColor;
+    borderColor = config?.colors?.borderColor || '#e6e6e8';
+    bodyBg = config?.colors?.bodyBg || '#fff';
+    headingColor = config?.colors?.headingColor || '#444050';
   }
 
   var dt_classrooms_table = $('.datatables-classrooms'),

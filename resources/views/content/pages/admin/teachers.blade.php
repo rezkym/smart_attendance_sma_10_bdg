@@ -91,7 +91,7 @@
     </div>
 
     <!-- Offcanvas to add/edit teacher -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddTeacher" aria-labelledby="offcanvasAddTeacherLabel">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddTeacher" aria-labelledby="offcanvasAddTeacherLabel" style="width: 400px;">
       <div class="offcanvas-header border-bottom">
         <h5 id="offcanvasAddTeacherLabel" class="offcanvas-title">Add Teacher</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -102,7 +102,7 @@
 
           <!-- User Selection (Add Mode) -->
           <div id="user-select-group" class="mb-5">
-            <label class="form-label" for="add-teacher-user">Select User with Teacher Role *</label>
+            <label class="form-label" for="add-teacher-user">Select User with Teacher Role <span class="text-danger">*</span></label>
             <select id="add-teacher-user" name="user_id" class="form-select select2">
               <option value="">Select a user...</option>
             </select>
@@ -111,33 +111,60 @@
 
           <!-- User Info Display (Edit Mode) -->
           <div id="user-info-group" class="mb-5" style="display: none;">
-            <div class="card bg-lighter">
+            <div class="card bg-lighter mb-3">
               <div class="card-body py-3">
-                <small class="text-muted d-block">User Account</small>
-                <span id="display-user-name" class="fw-medium"></span>
-                <br>
-                <small id="display-user-email" class="text-muted"></small>
+                <h6 class="mb-3 text-muted text-uppercase fw-semibold small">User Account</h6>
+                <div class="mb-2">
+                  <small class="text-muted d-block">Name</small>
+                  <span id="display-user-name" class="fw-medium"></span>
+                </div>
+                <div class="mb-2">
+                  <small class="text-muted d-block">Email</small>
+                  <span id="display-user-email" class="text-muted"></span>
+                </div>
               </div>
             </div>
+            <div class="card bg-lighter">
+              <div class="card-body py-3">
+                <h6 class="mb-3 text-muted text-uppercase fw-semibold small">Profile Information</h6>
+                <div class="row">
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Gender</small>
+                    <span id="display-user-gender">-</span>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Phone</small>
+                    <span id="display-user-phone">-</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Birth Place</small>
+                    <span id="display-user-birthplace">-</span>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <small class="text-muted d-block">Birth Date</small>
+                    <span id="display-user-birthdate">-</span>
+                  </div>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Address</small>
+                  <span id="display-user-address">-</span>
+                </div>
+              </div>
+            </div>
+            <small class="text-muted mt-2 d-block">
+              <i class="ri ri-information-line"></i> To edit profile data, go to <a href="/admin/users">Users Management</a>
+            </small>
           </div>
 
           <hr class="my-4">
 
-          <h6 class="mb-4">Teacher Information</h6>
+          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">Teacher Information</h6>
 
           <div class="form-floating form-floating-outline mb-5">
             <input type="text" class="form-control" id="add-teacher-nip" placeholder="199001012020011001" name="nip" maxlength="30" />
             <label for="add-teacher-nip">NIP (Employee Number)</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-teacher-phone" placeholder="+62812345678" name="phone" maxlength="20" />
-            <label for="add-teacher-phone">Phone</label>
-          </div>
-
-          <div class="form-floating form-floating-outline mb-5">
-            <textarea class="form-control" id="add-teacher-address" placeholder="Address" name="address" style="height: 80px"></textarea>
-            <label for="add-teacher-address">Address</label>
           </div>
 
           <div class="mb-5">
@@ -147,10 +174,13 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
-          <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
+          <div class="pt-3">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
+            <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
+          </div>
         </form>
       </div>
     </div>
   </div>
 @endsection
+

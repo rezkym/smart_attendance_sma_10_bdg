@@ -32,16 +32,6 @@ class StoreTeacherRequest extends FormRequest
                 'max:30',
                 Rule::unique('teachers', 'nip'),
             ],
-            'phone' => [
-                'nullable',
-                'string',
-                'max:20',
-            ],
-            'address' => [
-                'nullable',
-                'string',
-                'max:1000',
-            ],
             'is_active' => [
                 'nullable',
                 'boolean',
@@ -60,7 +50,7 @@ class StoreTeacherRequest extends FormRequest
             'user_id.unique' => 'This user already has a teacher profile.',
             'nip.unique' => 'This NIP is already registered.',
             'nip.max' => 'NIP must not exceed 30 characters.',
-            'phone.max' => 'Phone number must not exceed 20 characters.',
         ];
     }
 }
+

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const offcanvasAddUser = document.getElementById('offcanvasAddUser');
   const addNewUserForm = document.getElementById('addNewUserForm');
   const userIdInput = document.getElementById('user_id');
-  const userNameInput = document.getElementById('add-user-fullname');
+  const userNameInput = document.getElementById('add-user-name');
   const userEmailInput = document.getElementById('add-user-email');
   const userPasswordInput = document.getElementById('add-user-password');
   const userPasswordConfirmInput = document.getElementById('add-user-password-confirmation');
@@ -19,8 +19,26 @@ document.addEventListener('DOMContentLoaded', function () {
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const dtUserTable = document.querySelector('.datatables-users');
 
+  // Profile fields
+  const userFullNameInput = document.getElementById('add-user-fullname');
+  const userGenderSelect = document.getElementById('add-user-gender');
+  const userBirthPlaceInput = document.getElementById('add-user-birthplace');
+  const userBirthDateInput = document.getElementById('add-user-birthdate');
+  const userPhoneInput = document.getElementById('add-user-phone');
+  const userAddressInput = document.getElementById('add-user-address');
+
   // Base URLs
   const usersBaseUrl = '/admin/users';
+
+  // Initialize Flatpickr for birth date
+  let birthDatePicker;
+  if (userBirthDateInput) {
+    birthDatePicker = flatpickr(userBirthDateInput, {
+      dateFormat: 'Y-m-d',
+      maxDate: 'today',
+      allowInput: true
+    });
+  }
 
   // Initialize Select2 for roles
   if (userRoleSelect) {
@@ -69,9 +87,9 @@ document.addEventListener('DOMContentLoaded', function () {
           targets: 2,
           responsivePriority: 1,
           render: function (data, type, full) {
-            const name = full.name || '';
+            const displayName = full.full_name || full.name || '';
             const email = full.email || '';
-            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             const states = ['success', 'danger', 'warning', 'info', 'primary', 'secondary'];
             const state = states[Math.floor(Math.random() * states.length)];
 
@@ -83,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   </div>
                 </div>
                 <div class="d-flex flex-column">
-                  <span class="text-heading fw-medium">${name}</span>
+                  <span class="text-heading fw-medium">${displayName}</span>
                   <small class="text-muted">${email}</small>
                 </div>
               </div>
@@ -125,12 +143,13 @@ document.addEventListener('DOMContentLoaded', function () {
           orderable: false,
           searchable: false,
           render: function (data, type, full) {
+            const displayName = full.full_name || full.name || '';
             return `
               <div class="d-flex align-items-center">
                 <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-user" data-user-id="${full.id}">
                   <i class="icon-base ri ri-edit-box-line icon-22px"></i>
                 </a>
-                <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-user" data-user-id="${full.id}" data-user-name="${full.name}">
+                <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-user" data-user-id="${full.id}" data-user-name="${displayName}">
                   <i class="icon-base ri ri-delete-bin-7-line icon-22px"></i>
                 </a>
               </div>
@@ -180,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
           display: DataTable.Responsive.display.modal({
             header: function (row) {
               const data = row.data();
-              return 'Details of ' + data.name;
+              return 'Details of ' + (data.full_name || data.name);
             }
           }),
           type: 'column',
@@ -251,9 +270,17 @@ document.addEventListener('DOMContentLoaded', function () {
       const userPasswordConfirm = userPasswordConfirmInput?.value;
       const selectedRoles = $(userRoleSelect).val() || [];
 
+      // Profile fields
+      const userFullName = userFullNameInput?.value.trim();
+      const userGender = userGenderSelect?.value;
+      const userBirthPlace = userBirthPlaceInput?.value.trim();
+      const userBirthDate = userBirthDateInput?.value;
+      const userPhone = userPhoneInput?.value.trim();
+      const userAddress = userAddressInput?.value.trim();
+
       // Basic validation
       if (!userName) {
-        showAlert('error', 'Validation Error', 'Name is required.');
+        showAlert('error', 'Validation Error', 'Username is required.');
         return;
       }
 
@@ -263,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const isEdit = userId !== '';
-      
+
       // Password validation for create mode
       if (!isEdit && !userPassword) {
         showAlert('error', 'Validation Error', 'Password is required.');
@@ -281,7 +308,14 @@ document.addEventListener('DOMContentLoaded', function () {
       const payload = {
         name: userName,
         email: userEmail,
-        roles: selectedRoles
+        roles: selectedRoles,
+        // Profile fields
+        full_name: userFullName || null,
+        gender: userGender || null,
+        birth_place: userBirthPlace || null,
+        birth_date: userBirthDate || null,
+        phone_number: userPhone || null,
+        address: userAddress || null
       };
 
       // Only include password if provided
@@ -295,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': csrfToken,
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
         body: JSON.stringify(payload)
       })
@@ -330,6 +364,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (userPasswordInput) userPasswordInput.value = '';
     if (userPasswordConfirmInput) userPasswordConfirmInput.value = '';
     if (userRoleSelect) $(userRoleSelect).val(null).trigger('change');
+
+    // Reset profile fields
+    if (userFullNameInput) userFullNameInput.value = '';
+    if (userGenderSelect) userGenderSelect.value = '';
+    if (userBirthPlaceInput) userBirthPlaceInput.value = '';
+    if (birthDatePicker) birthDatePicker.clear();
+    if (userPhoneInput) userPhoneInput.value = '';
+    if (userAddressInput) userAddressInput.value = '';
+
     if (offcanvasTitle) offcanvasTitle.textContent = 'Add User';
     if (passwordHint) passwordHint.style.display = 'none';
   }
@@ -338,18 +381,30 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch(`${usersBaseUrl}/${userId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        Accept: 'application/json'
       }
     })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          // Account fields
           if (userIdInput) userIdInput.value = data.data.id;
           if (userNameInput) userNameInput.value = data.data.name;
           if (userEmailInput) userEmailInput.value = data.data.email;
           if (userRoleSelect) {
             $(userRoleSelect).val(data.data.roles).trigger('change');
           }
+
+          // Profile fields
+          if (userFullNameInput) userFullNameInput.value = data.data.full_name || '';
+          if (userGenderSelect) userGenderSelect.value = data.data.gender || '';
+          if (userBirthPlaceInput) userBirthPlaceInput.value = data.data.birth_place || '';
+          if (birthDatePicker && data.data.birth_date) {
+            birthDatePicker.setDate(data.data.birth_date, false);
+          }
+          if (userPhoneInput) userPhoneInput.value = data.data.phone_number || '';
+          if (userAddressInput) userAddressInput.value = data.data.address || '';
+
           if (offcanvasTitle) offcanvasTitle.textContent = 'Edit User';
           if (passwordHint) passwordHint.style.display = 'block';
 
@@ -384,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
           method: 'DELETE',
           headers: {
             'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         })
           .then(response => response.json())
@@ -448,3 +503,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, 100);
 });
+

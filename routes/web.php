@@ -22,15 +22,9 @@ Route::get('/', function () {
     // return view('content.pages.pages-home');
 })->name('pages-home');
 
-// Route Go Home to spesific role after
-Route::any('/home', function (Request $request) {
-    if (! $request->user()) {
-        return redirect()->route('login');
-    }
-
-    return redirect()->route('admin.dashboard');
-})
-    ->middleware('auth')
+// Route Go Home - Redirects user based on their role
+Route::any('/home', fn () => null)
+    ->middleware(['auth', 'redirect_by_role'])
     ->name('home');
 
 // authentication

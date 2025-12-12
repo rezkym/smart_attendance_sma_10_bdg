@@ -80,4 +80,21 @@ class UserRepository implements UserRepositoryInterface
         return $this->model->newQuery()
             ->with('roles');
     }
+
+    /**
+     * Get users with specific role who don't have a specific relation.
+     *
+     * @param string $roleName The role name to filter by
+     * @param string $relationName The relation name that must not exist
+     * @return Collection<int, User>
+     */
+    public function getUsersByRoleWithoutRelation(string $roleName, string $relationName): Collection
+    {
+        return $this->model->newQuery()
+            ->role($roleName)
+            ->whereDoesntHave($relationName)
+            ->orderBy('name')
+            ->get();
+    }
 }
+

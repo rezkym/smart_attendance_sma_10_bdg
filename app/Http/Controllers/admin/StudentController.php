@@ -37,11 +37,20 @@ class StudentController extends Controller
         $query = $this->studentService->getDataTableQuery();
 
         return DataTables::eloquent($query)
+            ->addColumn('user_name', function ($student) {
+                return $student->user?->display_name ?? '';
+            })
+            ->addColumn('user_email', function ($student) {
+                return $student->user?->email ?? '';
+            })
+            ->addColumn('user_phone', function ($student) {
+                return $student->user?->phone_number ?? '';
+            })
+            ->addColumn('user_gender', function ($student) {
+                return $student->user?->gender?->label() ?? '';
+            })
             ->addColumn('classroom_name', function ($student) {
                 return $student->classroom?->name ?? '-';
-            })
-            ->addColumn('gender_label', function ($student) {
-                return $student->gender->label();
             })
             ->addColumn('status', function ($student) {
                 return $student->is_active;
@@ -73,21 +82,18 @@ class StudentController extends Controller
     }
 
     /**
-     * Get available users for dropdown (not already linked to a student).
+     * Get available users for dropdown (users with student role who don't have a student profile).
      */
-    public function availableUsers(Request $request): JsonResponse
+    public function availableUsers(): JsonResponse
     {
-        $excludeStudentId = $request->query('exclude_student');
-        $users = $this->studentService->getAvailableUsers(
-            $excludeStudentId ? (int) $excludeStudentId : null
-        );
+        $users = $this->studentService->getAvailableUsers();
 
         return response()->json([
             'success' => true,
             'data' => $users->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'name' => $user->display_name,
                     'email' => $user->email,
                 ];
             }),
@@ -101,14 +107,9 @@ class StudentController extends Controller
     {
         try {
             $student = $this->studentService->createStudent([
+                'user_id' => $request->validated('user_id'),
                 'nisn' => $request->validated('nisn'),
                 'nis' => $request->validated('nis'),
-                'full_name' => $request->validated('full_name'),
-                'gender' => $request->validated('gender'),
-                'birth_place' => $request->validated('birth_place'),
-                'birth_date' => $request->validated('birth_date'),
-                'address' => $request->validated('address'),
-                'phone_number' => $request->validated('phone_number'),
                 'rfid_card_number' => $request->validated('rfid_card_number'),
                 'enrollment_date' => $request->validated('enrollment_date'),
                 'classroom_id' => $request->validated('classroom_id'),
@@ -118,7 +119,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Student '{$student->full_name}' created successfully.",
+                'message' => "Student '{$student->display_name}' created successfully.",
                 'data' => $this->formatStudentData($student),
             ], 201);
         } catch (\Exception $e) {
@@ -160,12 +161,6 @@ class StudentController extends Controller
                 [
                     'nisn' => $request->validated('nisn'),
                     'nis' => $request->validated('nis'),
-                    'full_name' => $request->validated('full_name'),
-                    'gender' => $request->validated('gender'),
-                    'birth_place' => $request->validated('birth_place'),
-                    'birth_date' => $request->validated('birth_date'),
-                    'address' => $request->validated('address'),
-                    'phone_number' => $request->validated('phone_number'),
                     'rfid_card_number' => $request->validated('rfid_card_number'),
                     'enrollment_date' => $request->validated('enrollment_date'),
                     'classroom_id' => $request->validated('classroom_id'),
@@ -176,7 +171,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Student '{$updatedStudent->full_name}' updated successfully.",
+                'message' => "Student '{$updatedStudent->display_name}' updated successfully.",
                 'data' => $this->formatStudentData($updatedStudent),
             ]);
         } catch (\InvalidArgumentException $e) {
@@ -208,31 +203,39 @@ class StudentController extends Controller
     }
 
     /**
-     * Format student data for JSON response.
+     * Format student data for JSON response including user profile.
      *
      * @return array<string, mixed>
      */
     private function formatStudentData(\App\Models\Student $student): array
     {
+        $user = $student->user;
+
         return [
             'id' => $student->id,
             'user_id' => $student->user_id,
             'classroom_id' => $student->classroom_id,
             'classroom_name' => $student->classroom?->name,
+            // Student specific fields
             'nisn' => $student->nisn,
             'nis' => $student->nis,
-            'full_name' => $student->full_name,
-            'gender' => $student->gender->value,
-            'gender_label' => $student->gender->label(),
-            'birth_place' => $student->birth_place,
-            'birth_date' => $student->birth_date?->format('Y-m-d'),
-            'address' => $student->address,
-            'phone_number' => $student->phone_number,
             'rfid_card_number' => $student->rfid_card_number,
-            'photo' => $student->photo,
             'enrollment_date' => $student->enrollment_date?->format('Y-m-d'),
             'is_active' => $student->is_active,
             'notes' => $student->notes,
+            'photo' => $student->photo,
+            // User account fields
+            'name' => $user?->name,
+            'email' => $user?->email,
+            // User profile fields (from users table)
+            'full_name' => $user?->full_name,
+            'gender' => $user?->gender?->value,
+            'gender_label' => $user?->gender?->label(),
+            'birth_place' => $user?->birth_place,
+            'birth_date' => $user?->birth_date?->format('Y-m-d'),
+            'address' => $user?->address,
+            'phone_number' => $user?->phone_number,
         ];
     }
 }
+

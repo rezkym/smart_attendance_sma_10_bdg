@@ -34,6 +34,18 @@
                         <h4 class="mb-1">{{ env('APP_NAME') }}! 👋</h4>
                         <p class="mb-5">Silahkan Masuk untuk Melanjutkan</p>
 
+                        @if (session('error'))
+                            <div class="alert alert-solid-danger alert-dismissible d-flex align-items-center mb-4" role="alert">
+                                <span class="alert-icon rounded me-3">
+                                    <i class="icon-base ri ri-error-warning-line icon-md"></i>
+                                </span>
+                                <div class="flex-grow-1">
+                                    {{ session('error') }}
+                                </div>
+                                <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
                         <x-feedback-alert :type="['success', 'danger']"
                             :variant="['success' => 'basic', 'danger' => 'solid']" dismissible />
 
