@@ -73,6 +73,28 @@ class StudentController extends Controller
     }
 
     /**
+     * Get available users for dropdown (not already linked to a student).
+     */
+    public function availableUsers(Request $request): JsonResponse
+    {
+        $excludeStudentId = $request->query('exclude_student');
+        $users = $this->studentService->getAvailableUsers(
+            $excludeStudentId ? (int) $excludeStudentId : null
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ];
+            }),
+        ]);
+    }
+
+    /**
      * Store a new student.
      */
     public function store(StoreStudentRequest $request): JsonResponse

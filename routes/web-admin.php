@@ -49,6 +49,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware(['permission:students.view'])->group(function () {
         Route::get('students/list', [StudentController::class, 'list'])->name('students.list');
         Route::get('students/available-classrooms', [StudentController::class, 'availableClassrooms'])->name('students.available-classrooms');
+        Route::get('students/available-users', [StudentController::class, 'availableUsers'])->name('students.available-users');
         Route::resource('students', StudentController::class)->except(['create', 'edit']);
     });
 

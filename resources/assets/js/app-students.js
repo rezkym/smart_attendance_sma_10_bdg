@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const studentEnrollmentDateInput = document.getElementById('add-student-enrollment-date');
   const studentNotesInput = document.getElementById('add-student-notes');
   const studentIsActiveInput = document.getElementById('add-student-is-active');
+  const studentUserSelect = document.getElementById('add-student-user');
   const offcanvasTitle = document.getElementById('offcanvasAddStudentLabel');
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const dtStudentTable = document.querySelector('.datatables-students');
@@ -39,6 +40,16 @@ document.addEventListener('DOMContentLoaded', function () {
         placeholder: 'Select a classroom...',
         allowClear: true
       });
+      
+      // Initialize user select2
+      if (studentUserSelect) {
+        $(studentUserSelect).select2({
+          dropdownParent: $('#offcanvasAddStudent'),
+          placeholder: 'Select a user account...',
+          allowClear: true
+        });
+      }
+      
       select2Initialized = true;
     }
   }
@@ -69,6 +80,37 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch(error => {
         console.error('Error loading classrooms:', error);
+      });
+  }
+
+  // Load available users for Select2
+  function loadAvailableUsers(excludeStudentId = null, selectedUserId = null) {
+    let url = `${studentsBaseUrl}/available-users`;
+    if (excludeStudentId) {
+      url += `?exclude_student=${excludeStudentId}`;
+    }
+    
+    fetch(url, {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          $(studentUserSelect).empty();
+          $(studentUserSelect).append(new Option('No User Account', '', true, true));
+
+          data.data.forEach(user => {
+            const isSelected = selectedUserId && selectedUserId == user.id;
+            const option = new Option(`${user.name} (${user.email})`, user.id, isSelected, isSelected);
+            $(studentUserSelect).append(option);
+          });
+
+          $(studentUserSelect).trigger('change');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading users:', error);
       });
   }
 
@@ -216,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
     offcanvasAddStudent.addEventListener('show.bs.offcanvas', function () {
       initSelect2();
       loadAvailableClassrooms();
+      loadAvailableUsers();
     });
 
     offcanvasAddStudent.addEventListener('hidden.bs.offcanvas', function () {
@@ -272,6 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
         nis: nis,
         full_name: fullName,
         gender: gender,
+        user_id: $(studentUserSelect).val() || null,
         classroom_id: classroomId || null,
         birth_place: birthPlace || null,
         birth_date: birthDate || null,
@@ -335,6 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Reset Select2
     $(studentClassroomSelect).val('').trigger('change');
+    $(studentUserSelect).val('').trigger('change');
 
     // Reset to add mode
     isEditMode = false;
@@ -366,6 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Load classrooms first, then set value
           loadAvailableClassrooms();
+          loadAvailableUsers(data.data.id, data.data.user_id);
           setTimeout(() => {
             if (data.data.classroom_id) {
               $(studentClassroomSelect).val(data.data.classroom_id).trigger('change');

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Student;
+use App\Models\User;
 use App\Repositories\Contracts\ClassroomRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,7 +16,8 @@ class StudentService
 {
     public function __construct(
         protected StudentRepositoryInterface $studentRepository,
-        protected ClassroomRepositoryInterface $classroomRepository
+        protected ClassroomRepositoryInterface $classroomRepository,
+        protected UserRepositoryInterface $userRepository
     ) {}
 
     /**
@@ -199,5 +202,29 @@ class StudentService
     public function getDataTableQuery(): Builder
     {
         return $this->studentRepository->getDataTableQuery();
+    }
+
+    /**
+     * Get available users for student assignment (users not already linked to a student).
+     *
+     * @return Collection<int, User>
+     */
+    public function getAvailableUsers(?int $excludeStudentId = null): Collection
+    {
+        $allUsers = $this->userRepository->getAllUsers();
+        
+        // Get user IDs already linked to students
+        $linkedUserIds = Student::query()
+            ->whereNotNull('user_id')
+            ->when($excludeStudentId, function ($query) use ($excludeStudentId) {
+                return $query->where('id', '!=', $excludeStudentId);
+            })
+            ->pluck('user_id')
+            ->toArray();
+        
+        // Filter out users already linked
+        return $allUsers->filter(function ($user) use ($linkedUserIds) {
+            return !in_array($user->id, $linkedUserIds);
+        })->values();
     }
 }

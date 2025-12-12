@@ -128,6 +128,14 @@
           <hr class="my-4">
           <h6 class="mb-4">Personal Information</h6>
 
+          <div class="mb-5">
+            <label for="add-student-user" class="form-label">User Account (Optional)</label>
+            <select id="add-student-user" name="user_id" class="select2 form-select" data-allow-clear="true">
+              <option value="">No User Account</option>
+            </select>
+            <small class="text-muted">Link to user account for login access</small>
+          </div>
+
           <div class="form-floating form-floating-outline mb-5">
             <input type="text" class="form-control" id="add-student-full-name" placeholder="Ahmad Fauzi" name="full_name" maxlength="100" required />
             <label for="add-student-full-name">Full Name *</label>

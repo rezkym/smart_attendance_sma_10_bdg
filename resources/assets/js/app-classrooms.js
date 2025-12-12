@@ -382,8 +382,19 @@ $(function () {
     var url = recordId ? `${baseUrl}admin/classrooms/${recordId}` : `${baseUrl}admin/classrooms`;
     var method = recordId ? 'PUT' : 'POST';
 
+    // Build data object manually to handle is_active properly
+    var formData = {
+      name: $('#add-classroom-name').val(),
+      grade_level: $('#add-classroom-grade').val(),
+      academic_year_id: $('#add-classroom-academic-year').val(),
+      homeroom_teacher_id: $('#add-classroom-homeroom-teacher').val() || null,
+      capacity: $('#add-classroom-capacity').val() || null,
+      description: $('#add-classroom-description').val() || null,
+      is_active: $('#add-classroom-is-active').is(':checked') ? 1 : 0
+    };
+
     $.ajax({
-      data: form.serialize(),
+      data: formData,
       url: url,
       type: method,
       headers: {
