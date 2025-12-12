@@ -8,18 +8,22 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
  * @property string $name
  * @property int $grade_level
  * @property int $academic_year_id
+ * @property int|null $homeroom_teacher_id
  * @property int|null $capacity
  * @property string|null $description
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read AcademicYear $academicYear
+ * @property-read Teacher|null $homeroomTeacher
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Student> $students
  */
 class Classroom extends Model
 {
@@ -32,6 +36,7 @@ class Classroom extends Model
         'name',
         'grade_level',
         'academic_year_id',
+        'homeroom_teacher_id',
         'capacity',
         'description',
         'is_active',
@@ -57,6 +62,26 @@ class Classroom extends Model
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    /**
+     * Get the homeroom teacher for this classroom.
+     *
+     * @return BelongsTo<Teacher, Classroom>
+     */
+    public function homeroomTeacher(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
+    }
+
+    /**
+     * Get students in this classroom.
+     *
+     * @return HasMany<Student, Classroom>
+     */
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class);
     }
 
     /**

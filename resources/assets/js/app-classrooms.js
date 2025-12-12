@@ -26,10 +26,31 @@ $(function () {
   if (select2.length) {
     select2.each(function () {
       var $this = $(this);
+      var placeholder = $this.attr('id') === 'add-classroom-homeroom-teacher' 
+        ? 'Select Homeroom Teacher' 
+        : 'Select Academic Year';
       $this.wrap('<div class="position-relative"></div>').select2({
-        placeholder: 'Select Academic Year',
+        placeholder: placeholder,
+        allowClear: $this.data('allow-clear') || false,
         dropdownParent: $this.parent()
       });
+    });
+  }
+
+  // Function to load homeroom teachers
+  function loadHomeroomTeachers(selectedId = null) {
+    $.get(`${baseUrl}admin/classrooms/available-homeroom-teachers`, function (response) {
+      if (response.success) {
+        var select = $('#add-classroom-homeroom-teacher');
+        select.find('option:not(:first)').remove();
+        response.data.forEach(function (teacher) {
+          var selected = selectedId && selectedId == teacher.id ? 'selected' : '';
+          select.append(`<option value="${teacher.id}" ${selected}>${teacher.name}${teacher.nip ? ' (' + teacher.nip + ')' : ''}</option>`);
+        });
+        if (selectedId) {
+          select.val(selectedId).trigger('change');
+        }
+      }
     });
   }
 
@@ -46,7 +67,8 @@ $(function () {
         { data: 'id' },
         { data: 'name' },
         { data: 'grade_level' },
-        { data: 'academic_year_name' }, // calculated column
+        { data: 'academic_year_name' },
+        { data: 'homeroom_teacher_name' },
         { data: 'capacity' },
         { data: 'status' },
         { data: 'actions' }
@@ -98,15 +120,25 @@ $(function () {
           }
         },
         {
-          // Capacity
+          // Homeroom Teacher
           targets: 5,
+          render: function (data, type, full, meta) {
+            var teacher = full['homeroom_teacher_name'];
+            return teacher && teacher !== '-' 
+              ? '<span class="badge bg-label-info">' + teacher + '</span>' 
+              : '<span class="text-muted">-</span>';
+          }
+        },
+        {
+          // Capacity
+          targets: 6,
           render: function (data, type, full, meta) {
             return  full['capacity'] ? full['capacity'] : '-';
           }
         },
         {
           // Status
-          targets: 6,
+          targets: 7,
           render: function (data, type, full, meta) {
             var $status = full['status'];
             return (
@@ -281,6 +313,9 @@ $(function () {
         $('#add-classroom-capacity').val(data.capacity);
         $('#add-classroom-is-active').prop('checked', data.is_active);
         $('#add-classroom-description').val(data.description);
+        
+        // Load homeroom teachers with selected value
+        loadHomeroomTeachers(data.homeroom_teacher_id);
       }
     });
   });
@@ -404,8 +439,18 @@ $(function () {
       $('#offcanvasAddClassroomLabel').html('Add Classroom');
       addNewClassroomForm.reset();
       $('#add-classroom-academic-year').val('').trigger('change');
+      $('#add-classroom-homeroom-teacher').val('').trigger('change');
       
       // Reset validation
       fv.resetForm(true);
+  });
+
+  // Load homeroom teachers when offcanvas is opened for new classroom
+  bsOffcanvasAddClassroom.on('show.bs.offcanvas', function (e) {
+    var trigger = $(e.relatedTarget);
+    // Only load if it's not an edit (no data-id)
+    if (!trigger.hasClass('edit-record')) {
+      loadHomeroomTeachers();
+    }
   });
 });

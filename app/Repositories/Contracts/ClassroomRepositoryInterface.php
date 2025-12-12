@@ -69,4 +69,11 @@ interface ClassroomRepositoryInterface
      * Get query builder for DataTables with academicYear eager loading
      */
     public function getDataTableQuery(): Builder;
+
+    /**
+     * Get classrooms by homeroom teacher
+     *
+     * @return Collection<int, Classroom>
+     */
+    public function getByHomeroomTeacher(int $teacherId): Collection;
 }

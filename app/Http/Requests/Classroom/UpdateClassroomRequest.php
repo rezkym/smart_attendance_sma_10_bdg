@@ -46,6 +46,11 @@ class UpdateClassroomRequest extends FormRequest
                 'min:1',
                 'max:100',
             ],
+            'homeroom_teacher_id' => [
+                'nullable',
+                'integer',
+                'exists:teachers,id',
+            ],
             'description' => [
                 'nullable',
                 'string',

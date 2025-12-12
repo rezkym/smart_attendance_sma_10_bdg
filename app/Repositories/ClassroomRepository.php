@@ -18,7 +18,7 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     public function getAll(): Collection
     {
         return $this->model->newQuery()
-            ->with('academicYear')
+            ->with(['academicYear', 'homeroomTeacher.user'])
             ->orderBy('grade_level')
             ->orderBy('name')
             ->get();
@@ -27,7 +27,7 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     public function getAllActive(): Collection
     {
         return $this->model->newQuery()
-            ->with('academicYear')
+            ->with(['academicYear', 'homeroomTeacher.user'])
             ->active()
             ->orderBy('grade_level')
             ->orderBy('name')
@@ -37,7 +37,7 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     public function getByAcademicYear(int $academicYearId): Collection
     {
         return $this->model->newQuery()
-            ->with('academicYear')
+            ->with(['academicYear', 'homeroomTeacher.user'])
             ->where('academic_year_id', $academicYearId)
             ->active()
             ->orderBy('grade_level')
@@ -48,7 +48,7 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     public function findById(int $classroomId): ?Classroom
     {
         return $this->model->newQuery()
-            ->with('academicYear')
+            ->with(['academicYear', 'homeroomTeacher.user'])
             ->find($classroomId);
     }
 
@@ -56,14 +56,14 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     {
         $classroom = $this->model->newQuery()->create($data);
 
-        return $classroom->load('academicYear');
+        return $classroom->load(['academicYear', 'homeroomTeacher.user']);
     }
 
     public function update(Classroom $classroom, array $data): Classroom
     {
         $classroom->update($data);
 
-        return $classroom->fresh()->load('academicYear');
+        return $classroom->fresh()->load(['academicYear', 'homeroomTeacher.user']);
     }
 
     public function delete(Classroom $classroom): bool
@@ -84,8 +84,18 @@ class ClassroomRepository implements ClassroomRepositoryInterface
     public function getDataTableQuery(): Builder
     {
         return $this->model->newQuery()
-            ->with('academicYear')
+            ->with(['academicYear', 'homeroomTeacher.user'])
             ->orderBy('grade_level')
             ->orderBy('name');
+    }
+
+    public function getByHomeroomTeacher(int $teacherId): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['academicYear', 'homeroomTeacher.user'])
+            ->where('homeroom_teacher_id', $teacherId)
+            ->orderBy('grade_level')
+            ->orderBy('name')
+            ->get();
     }
 }

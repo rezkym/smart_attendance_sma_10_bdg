@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -53,6 +54,16 @@ class Teacher extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the classrooms where this teacher is the homeroom teacher.
+     *
+     * @return HasMany<Classroom, Teacher>
+     */
+    public function homerooms(): HasMany
+    {
+        return $this->hasMany(Classroom::class, 'homeroom_teacher_id');
     }
 
     /**

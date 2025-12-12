@@ -41,6 +41,9 @@ class ClassroomController extends Controller
             ->addColumn('academic_year_name', function ($classroom) {
                 return $classroom->academicYear->name ?? '-';
             })
+            ->addColumn('homeroom_teacher_name', function ($classroom) {
+                return $classroom->homeroomTeacher?->user?->name ?? '-';
+            })
             ->addColumn('status', function ($classroom) {
                 return $classroom->is_active;
             })
@@ -108,7 +111,18 @@ class ClassroomController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $classroomData,
+            'data' => [
+                'id' => $classroomData->id,
+                'name' => $classroomData->name,
+                'grade_level' => $classroomData->grade_level,
+                'academic_year_id' => $classroomData->academic_year_id,
+                'academic_year_name' => $classroomData->academicYear?->name,
+                'homeroom_teacher_id' => $classroomData->homeroom_teacher_id,
+                'homeroom_teacher_name' => $classroomData->homeroomTeacher?->user?->name,
+                'capacity' => $classroomData->capacity,
+                'description' => $classroomData->description,
+                'is_active' => $classroomData->is_active,
+            ],
         ]);
     }
 
@@ -146,6 +160,58 @@ class ClassroomController extends Controller
                 'message' => 'Classroom deleted successfully.',
             ]);
         } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Get available homeroom teachers for dropdown
+     */
+    public function availableHomeroomTeachers(): JsonResponse
+    {
+        $teachers = $this->classroomService->getAvailableHomeroomTeachers();
+
+        return response()->json([
+            'success' => true,
+            'data' => $teachers->map(function ($teacher) {
+                return [
+                    'id' => $teacher->id,
+                    'name' => $teacher->user->name,
+                    'nip' => $teacher->nip,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Assign homeroom teacher to classroom
+     */
+    public function assignHomeroom(Request $request, int $classroom): JsonResponse
+    {
+        $request->validate([
+            'homeroom_teacher_id' => 'nullable|integer|exists:teachers,id',
+        ]);
+
+        try {
+            $updatedClassroom = $this->classroomService->assignHomeroomTeacher(
+                $classroom,
+                $request->input('homeroom_teacher_id')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Homeroom teacher assigned successfully.',
+                'data' => [
+                    'id' => $updatedClassroom->id,
+                    'name' => $updatedClassroom->name,
+                    'homeroom_teacher_id' => $updatedClassroom->homeroom_teacher_id,
+                    'homeroom_teacher_name' => $updatedClassroom->homeroomTeacher?->user?->name,
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

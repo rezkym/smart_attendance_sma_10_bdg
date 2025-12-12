@@ -12,8 +12,7 @@
 
 ## Fase 3: Dependency Tingkat 2
 - [x] Student Management *(User, Classroom)* ✅
-
-
+- [x] Classroom Assignment *(Classroom, Teacher - assign homeroom teacher)* ✅
 
 ## Fase 4: Dependency Tingkat 3
 - [ ] Schedule/Timetable Management *(Classroom, Subject, Teacher, Academic Year)*

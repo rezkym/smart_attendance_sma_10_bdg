@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Classroom;
+use App\Models\Teacher;
 use App\Repositories\Contracts\ClassroomRepositoryInterface;
+use App\Repositories\Contracts\TeacherRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 class ClassroomService
 {
     public function __construct(
-        protected ClassroomRepositoryInterface $classroomRepository
+        protected ClassroomRepositoryInterface $classroomRepository,
+        protected TeacherRepositoryInterface $teacherRepository
     ) {}
 
     /**
@@ -57,7 +60,7 @@ class ClassroomService
     /**
      * Create a new classroom
      *
-     * @param array{name: string, grade_level: int, academic_year_id: int, capacity?: int|null, description?: string|null, is_active?: bool} $data
+     * @param array{name: string, grade_level: int, academic_year_id: int, homeroom_teacher_id?: int|null, capacity?: int|null, description?: string|null, is_active?: bool} $data
      */
     public function createClassroom(array $data): Classroom
     {
@@ -66,6 +69,7 @@ class ClassroomService
                 'name' => $data['name'],
                 'grade_level' => $data['grade_level'],
                 'academic_year_id' => $data['academic_year_id'],
+                'homeroom_teacher_id' => $data['homeroom_teacher_id'] ?? null,
                 'capacity' => $data['capacity'] ?? null,
                 'description' => $data['description'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
@@ -76,7 +80,7 @@ class ClassroomService
     /**
      * Update classroom
      *
-     * @param array{name?: string, grade_level?: int, academic_year_id?: int, capacity?: int|null, description?: string|null, is_active?: bool} $data
+     * @param array{name?: string, grade_level?: int, academic_year_id?: int, homeroom_teacher_id?: int|null, capacity?: int|null, description?: string|null, is_active?: bool} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -100,6 +104,9 @@ class ClassroomService
             if (isset($data['academic_year_id'])) {
                 $updateData['academic_year_id'] = $data['academic_year_id'];
             }
+            if (array_key_exists('homeroom_teacher_id', $data)) {
+                $updateData['homeroom_teacher_id'] = $data['homeroom_teacher_id'];
+            }
             if (array_key_exists('capacity', $data)) {
                 $updateData['capacity'] = $data['capacity'];
             }
@@ -114,7 +121,7 @@ class ClassroomService
                 return $this->classroomRepository->update($classroom, $updateData);
             }
 
-            return $classroom->fresh()->load('academicYear');
+            return $classroom->fresh()->load(['academicYear', 'homeroomTeacher.user']);
         });
     }
 
@@ -159,5 +166,51 @@ class ClassroomService
     public function getDataTableQuery(): Builder
     {
         return $this->classroomRepository->getDataTableQuery();
+    }
+
+    /**
+     * Get available homeroom teachers (active teachers)
+     *
+     * @return Collection<int, Teacher>
+     */
+    public function getAvailableHomeroomTeachers(): Collection
+    {
+        return $this->teacherRepository->getAllActive();
+    }
+
+    /**
+     * Assign homeroom teacher to classroom
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function assignHomeroomTeacher(int $classroomId, ?int $teacherId): Classroom
+    {
+        $classroom = $this->classroomRepository->findById($classroomId);
+
+        if ($classroom === null) {
+            throw new \InvalidArgumentException("Classroom with ID {$classroomId} not found.");
+        }
+
+        // Validate teacher exists if provided
+        if ($teacherId !== null) {
+            $teacher = $this->teacherRepository->findById($teacherId);
+            if ($teacher === null) {
+                throw new \InvalidArgumentException("Teacher with ID {$teacherId} not found.");
+            }
+        }
+
+        return $this->classroomRepository->update($classroom, [
+            'homeroom_teacher_id' => $teacherId,
+        ]);
+    }
+
+    /**
+     * Get classrooms by homeroom teacher
+     *
+     * @return Collection<int, Classroom>
+     */
+    public function getClassroomsByHomeroomTeacher(int $teacherId): Collection
+    {
+        return $this->classroomRepository->getByHomeroomTeacher($teacherId);
     }
 }

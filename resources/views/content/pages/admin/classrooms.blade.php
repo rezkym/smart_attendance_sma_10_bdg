@@ -95,6 +95,7 @@
             <th>Name</th>
             <th>Grade</th>
             <th>Academic Year</th>
+            <th>Homeroom Teacher</th>
             <th>Capacity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -143,6 +144,13 @@
           <div class="form-floating form-floating-outline mb-5 form-control-validation">
             <input type="number" class="form-control" id="add-classroom-capacity" placeholder="30" name="capacity" min="1" max="100" />
             <label for="add-classroom-capacity">Capacity</label>
+          </div>
+
+          <div class="mb-5">
+            <label for="add-classroom-homeroom-teacher" class="form-label">Homeroom Teacher</label>
+            <select id="add-classroom-homeroom-teacher" name="homeroom_teacher_id" class="select2 form-select" data-allow-clear="true">
+              <option value="">Select Homeroom Teacher (Optional)</option>
+            </select>
           </div>
 
           <div class="mb-5">

@@ -63,6 +63,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware(['permission:classrooms.view'])->group(function () {
         Route::get('classrooms/list', [ClassroomController::class, 'list'])->name('classrooms.list');
         Route::get('classrooms/by-academic-year/{academic_year}', [ClassroomController::class, 'getByAcademicYear'])->name('classrooms.by-academic-year');
+        Route::get('classrooms/available-homeroom-teachers', [ClassroomController::class, 'availableHomeroomTeachers'])->name('classrooms.available-homeroom-teachers');
+        Route::post('classrooms/{classroom}/assign-homeroom', [ClassroomController::class, 'assignHomeroom'])->name('classrooms.assign-homeroom');
         Route::resource('classrooms', ClassroomController::class)->except(['create', 'edit']);
     });
 
