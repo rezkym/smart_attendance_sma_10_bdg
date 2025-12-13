@@ -197,7 +197,7 @@
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
                 <h5 class="text-white mb-1">Tingkat Kehadiran</h5>
-                <p class="text-white-50 mb-0">Persentase kehadiran (Hadir + Terlambat) dari total record</p>
+                <p class="text-white mb-0">Persentase kehadiran (Hadir + Terlambat) dari total record</p>
               </div>
               <div class="text-end">
                 <h2 class="text-white mb-0"><span id="summary-attendance-rate">0</span>%</h2>

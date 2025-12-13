@@ -259,7 +259,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                     'total' => 0,
                 ];
             }
-            $summary[$date][$attendance->status] = (int) $attendance->count;
+            $summary[$date][$attendance->status->value] = (int) $attendance->count;
             $summary[$date]['total'] += (int) $attendance->count;
         }
 
