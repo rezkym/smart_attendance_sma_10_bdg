@@ -148,6 +148,17 @@
       "icon": "menu-icon icon-base ri ri-file-list-3-line",
       "slug": "admin.iot-logs",
       "permissions": ["iot-logs.view"]
+    },
+    {
+      "menuHeader": "System",
+      "permissions": ["activity-logs.view"]
+    },
+    {
+      "url": "/admin/activity-logs",
+      "name": "Activity Logs",
+      "icon": "menu-icon icon-base ri ri-history-line",
+      "slug": "admin.activity-logs",
+      "permissions": ["activity-logs.view"]
     }
   ]
 }

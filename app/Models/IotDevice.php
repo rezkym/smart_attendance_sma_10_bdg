@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -30,7 +32,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class IotDevice extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    /**
+     * Get the activity log options for this model.
+     * Excludes api_key for security.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'device_code', 'description', 'location', 'classroom_id', 'status', 'ip_address', 'firmware_version'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName): string => "IoT Device {$eventName}")
+            ->useLogName('iot-device');
+    }
 
     /**
      * @var list<string>

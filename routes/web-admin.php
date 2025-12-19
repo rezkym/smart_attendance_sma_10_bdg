@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\admin\AdminDashboardController;
-use App\Http\Controllers\admin\AcademicYearController;
-use App\Http\Controllers\admin\PermissionController;
-use App\Http\Controllers\admin\ReportController;
-use App\Http\Controllers\admin\RoleController;
-use App\Http\Controllers\admin\SubjectController;
-use App\Http\Controllers\admin\TeacherController;
-use App\Http\Controllers\admin\ClassroomController;
-use App\Http\Controllers\admin\AttendanceController;
-use App\Http\Controllers\admin\ScheduleController;
-use App\Http\Controllers\admin\StudentController;
-use App\Http\Controllers\admin\UserController;
-use App\Http\Controllers\admin\IotDeviceController;
-use App\Http\Controllers\admin\IotDevicePairingController;
-use App\Http\Controllers\admin\IotLogController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AcademicYearController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\Admin\ClassroomController;
+use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\IotDeviceController;
+use App\Http\Controllers\Admin\IotDevicePairingController;
+use App\Http\Controllers\Admin\IotLogController;
 use App\Http\Controllers\Admin\RfidCardController;
 use App\Http\Controllers\Admin\SemesterController;
 use Illuminate\Support\Facades\Route;
@@ -192,6 +192,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         
         Route::resource('rfid-cards', RfidCardController::class)->except(['create', 'edit']);
     });
-});
 
+    // Activity Log Management - requires activity-logs.view permission
+    Route::middleware(['permission:activity-logs.view'])->group(function () {
+        Route::get('activity-logs/list', [\App\Http\Controllers\Admin\ActivityLogController::class, 'list'])->name('activity-logs.list');
+        Route::get('activity-logs/log-names', [\App\Http\Controllers\Admin\ActivityLogController::class, 'logNames'])->name('activity-logs.log-names');
+        Route::get('activity-logs/event-types', [\App\Http\Controllers\Admin\ActivityLogController::class, 'eventTypes'])->name('activity-logs.event-types');
+        Route::resource('activity-logs', \App\Http\Controllers\Admin\ActivityLogController::class)->only(['index', 'show']);
+    });
+});
 

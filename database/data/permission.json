@@ -89,6 +89,8 @@
     { "name": "rfid-cards.create", "guard_name": "web" },
     { "name": "rfid-cards.edit", "guard_name": "web" },
     { "name": "rfid-cards.delete", "guard_name": "web" },
-    { "name": "rfid-cards.block", "guard_name": "web" }
+    { "name": "rfid-cards.block", "guard_name": "web" },
+
+    { "name": "activity-logs.view", "guard_name": "web" }
   ]
 }

@@ -93,7 +93,9 @@
         "rfid-cards.create",
         "rfid-cards.edit",
         "rfid-cards.delete",
-        "rfid-cards.block"
+        "rfid-cards.block",
+
+        "activity-logs.view"
       ]
     },
     {

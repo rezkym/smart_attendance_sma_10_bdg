@@ -47,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SemesterRepositoryInterface::class, SemesterRepository::class);
         $this->app->bind(\App\Repositories\Contracts\StudentEnrollmentRepositoryInterface::class, \App\Repositories\StudentEnrollmentRepository::class);
         $this->app->bind(\App\Repositories\Contracts\RfidCardRepositoryInterface::class, \App\Repositories\RfidCardRepository::class);
+        $this->app->bind(\App\Repositories\Contracts\ActivityLogRepositoryInterface::class, \App\Repositories\ActivityLogRepository::class);
     }
 
     /**
