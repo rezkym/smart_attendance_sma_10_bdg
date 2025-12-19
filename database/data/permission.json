@@ -22,6 +22,11 @@
     { "name": "academic-years.update", "guard_name": "web" },
     { "name": "academic-years.delete", "guard_name": "web" },
 
+    { "name": "semesters.view", "guard_name": "web" },
+    { "name": "semesters.create", "guard_name": "web" },
+    { "name": "semesters.update", "guard_name": "web" },
+    { "name": "semesters.delete", "guard_name": "web" },
+
     { "name": "students.view", "guard_name": "web" },
     { "name": "students.create", "guard_name": "web" },
     { "name": "students.update", "guard_name": "web" },
@@ -71,6 +76,19 @@
     { "name": "iot-devices.regenerate-key", "guard_name": "web" },
 
     { "name": "iot-logs.view", "guard_name": "web" },
-    { "name": "iot-logs.export", "guard_name": "web" }
+    { "name": "iot-logs.export", "guard_name": "web" },
+
+    { "name": "student-enrollments.view", "guard_name": "web" },
+    { "name": "student-enrollments.create", "guard_name": "web" },
+    { "name": "student-enrollments.update", "guard_name": "web" },
+    { "name": "student-enrollments.delete", "guard_name": "web" },
+    { "name": "student-enrollments.transfer", "guard_name": "web" },
+    { "name": "student-enrollments.graduate", "guard_name": "web" },
+
+    { "name": "rfid-cards.view", "guard_name": "web" },
+    { "name": "rfid-cards.create", "guard_name": "web" },
+    { "name": "rfid-cards.edit", "guard_name": "web" },
+    { "name": "rfid-cards.delete", "guard_name": "web" },
+    { "name": "rfid-cards.block", "guard_name": "web" }
   ]
 }

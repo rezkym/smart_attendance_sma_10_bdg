@@ -95,7 +95,7 @@ class ScheduleService
     /**
      * Create a new schedule.
      *
-     * @param array{classroom_id: int, subject_id: int, teacher_id: int, academic_year_id: int, day_of_week: int, start_time: string, end_time: string, is_active?: bool, notes?: string|null} $data
+     * @param array{classroom_id: int, subject_id: int, teacher_id: int, academic_year_id: int, semester_id: int, day_of_week: int, start_time: string, end_time: string, is_active?: bool, notes?: string|null} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -106,10 +106,10 @@ class ScheduleService
             throw new \InvalidArgumentException('End time must be after start time.');
         }
 
-        // Check for schedule conflicts
+        // Check for schedule conflicts using semester_id (per updated unique constraint)
         if ($this->scheduleRepository->hasConflict(
             $data['classroom_id'],
-            $data['academic_year_id'],
+            $data['semester_id'],
             $data['day_of_week'],
             $data['start_time']
         )) {
@@ -122,6 +122,7 @@ class ScheduleService
                 'subject_id' => $data['subject_id'],
                 'teacher_id' => $data['teacher_id'],
                 'academic_year_id' => $data['academic_year_id'],
+                'semester_id' => $data['semester_id'],
                 'day_of_week' => $data['day_of_week'],
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
@@ -134,7 +135,7 @@ class ScheduleService
     /**
      * Update schedule.
      *
-     * @param array{classroom_id?: int, subject_id?: int, teacher_id?: int, academic_year_id?: int, day_of_week?: int, start_time?: string, end_time?: string, is_active?: bool, notes?: string|null} $data
+     * @param array{classroom_id?: int, subject_id?: int, teacher_id?: int, academic_year_id?: int, semester_id?: int, day_of_week?: int, start_time?: string, end_time?: string, is_active?: bool, notes?: string|null} $data
      *
      * @throws \InvalidArgumentException
      */
@@ -148,7 +149,7 @@ class ScheduleService
 
         // Determine effective values for validation
         $classroomId = $data['classroom_id'] ?? $schedule->classroom_id;
-        $academicYearId = $data['academic_year_id'] ?? $schedule->academic_year_id;
+        $semesterId = $data['semester_id'] ?? $schedule->semester_id;
         $dayOfWeek = $data['day_of_week'] ?? $schedule->day_of_week->value;
         $startTime = $data['start_time'] ?? $schedule->start_time;
         $endTime = $data['end_time'] ?? $schedule->end_time;
@@ -158,10 +159,10 @@ class ScheduleService
             throw new \InvalidArgumentException('End time must be after start time.');
         }
 
-        // Check for schedule conflicts (exclude current schedule)
+        // Check for schedule conflicts using semester_id (exclude current schedule)
         if ($this->scheduleRepository->hasConflict(
             $classroomId,
-            $academicYearId,
+            $semesterId,
             is_int($dayOfWeek) ? $dayOfWeek : $dayOfWeek,
             $startTime,
             $scheduleId
@@ -184,6 +185,9 @@ class ScheduleService
             if (isset($data['academic_year_id'])) {
                 $updateData['academic_year_id'] = $data['academic_year_id'];
             }
+            if (isset($data['semester_id'])) {
+                $updateData['semester_id'] = $data['semester_id'];
+            }
             if (isset($data['day_of_week'])) {
                 $updateData['day_of_week'] = $data['day_of_week'];
             }
@@ -204,7 +208,7 @@ class ScheduleService
                 return $this->scheduleRepository->update($schedule, $updateData);
             }
 
-            return $schedule->fresh()->load(['classroom', 'subject', 'teacher.user', 'academicYear']);
+            return $schedule->fresh()->load(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester']);
         });
     }
 

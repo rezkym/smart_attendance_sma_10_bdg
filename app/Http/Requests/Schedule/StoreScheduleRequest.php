@@ -41,6 +41,11 @@ class StoreScheduleRequest extends FormRequest
                 'integer',
                 'exists:academic_years,id',
             ],
+            'semester_id' => [
+                'required',
+                'integer',
+                'exists:semesters,id',
+            ],
             'day_of_week' => [
                 'required',
                 'integer',
@@ -81,6 +86,8 @@ class StoreScheduleRequest extends FormRequest
             'teacher_id.exists' => 'Selected teacher does not exist.',
             'academic_year_id.required' => 'Academic year is required.',
             'academic_year_id.exists' => 'Selected academic year does not exist.',
+            'semester_id.required' => 'Semester is required.',
+            'semester_id.exists' => 'Selected semester does not exist.',
             'day_of_week.required' => 'Day of week is required.',
             'day_of_week.in' => 'Day of week must be between 1 (Monday) and 6 (Saturday).',
             'start_time.required' => 'Start time is required.',

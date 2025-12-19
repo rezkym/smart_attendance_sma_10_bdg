@@ -44,7 +44,7 @@
     },
     {
       "menuHeader": "Master Data",
-      "permissions": ["academic-years.view", "subjects.view", "classrooms.view", "teachers.view", "students.view"]
+      "permissions": ["academic-years.view", "semesters.view", "subjects.view", "classrooms.view", "teachers.view", "students.view"]
     },
     {
       "url": "/admin/academic-years",
@@ -52,6 +52,13 @@
       "icon": "menu-icon icon-base ri ri-calendar-line",
       "slug": "admin.academic-years",
       "permissions": ["academic-years.view"]
+    },
+    {
+      "url": "/admin/semesters",
+      "name": "Semesters",
+      "icon": "menu-icon icon-base ri ri-calendar-check-line",
+      "slug": "admin.semesters",
+      "permissions": ["semesters.view"]
     },
     {
       "url": "/admin/subjects",
@@ -80,6 +87,20 @@
       "icon": "menu-icon icon-base ri ri-graduation-cap-line",
       "slug": "admin.students",
       "permissions": ["students.view"]
+    },
+    {
+      "url": "/admin/student-enrollments",
+      "name": "Student Enrollments",
+      "icon": "menu-icon icon-base ri ri-user-add-line",
+      "slug": "admin.student-enrollments",
+      "permissions": ["student-enrollments.view"]
+    },
+    {
+      "url": "/admin/rfid-cards",
+      "name": "RFID Cards",
+      "icon": "menu-icon icon-base ri ri-bank-card-line",
+      "slug": "admin.rfid-cards",
+      "permissions": ["rfid-cards.view"]
     },
     {
       "url": "/admin/schedules",

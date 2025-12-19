@@ -68,9 +68,14 @@
     <div class="card-header border-bottom">
       <div class="d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">IoT Devices</h5>
-        <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddDevice">
-          <i class="ri ri-add-line me-1"></i> Add Device
-        </button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#scanNetworkModal">
+            <i class="ri ri-radar-line me-1"></i> Scan Network
+          </button>
+          <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddDevice">
+            <i class="ri ri-add-line me-1"></i> Add Device
+          </button>
+        </div>
       </div>
     </div>
     <div class="card-datatable table-responsive">
@@ -174,5 +179,72 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal to scan network for devices -->
+    <div class="modal fade" id="scanNetworkModal" tabindex="-1" aria-labelledby="scanNetworkModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="scanNetworkModalLabel">
+              <i class="ri ri-radar-line me-2"></i>Scan Network for IoT Devices
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info mb-4">
+              <i class="ri ri-information-line me-2"></i>
+              <strong>How it works:</strong> Enter an IP range to scan for ESP32 devices on your local network. 
+              Discovered devices will appear below for pairing.
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-8">
+                <label class="form-label" for="ip-range">IP Range (e.g., 192.168.1.1-254)</label>
+                <input type="text" class="form-control" id="ip-range" placeholder="192.168.1.1-254" />
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-info w-100" id="btn-start-scan">
+                  <i class="ri ri-radar-line me-1"></i> Start Scan
+                </button>
+              </div>
+            </div>
+
+            <div id="scan-progress" class="mb-4" style="display: none;">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Scanning: <span id="scan-current-ip">-</span></span>
+                <span><span id="scan-progress-count">0</span> / <span id="scan-progress-total">0</span></span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="scan-progress-bar" role="progressbar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <h6 class="mb-3">Discovered Devices (<span id="discovered-count">0</span>)</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered" id="discovered-devices-table">
+                <thead>
+                  <tr>
+                    <th>IP Address</th>
+                    <th>Device Code</th>
+                    <th>Firmware</th>
+                    <th>Configured</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="discovered-devices-body">
+                  <tr id="no-devices-row">
+                    <td colspan="5" class="text-center text-muted">No devices discovered yet. Start a scan to find devices.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 @endsection
+

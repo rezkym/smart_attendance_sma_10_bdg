@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $subject_id
  * @property int $teacher_id
  * @property int $academic_year_id
+ * @property int $semester_id
  * @property DayOfWeek $day_of_week
  * @property string $start_time
  * @property string $end_time
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Subject $subject
  * @property-read Teacher $teacher
  * @property-read AcademicYear $academicYear
+ * @property-read Semester $semester
  */
 class Schedule extends Model
 {
@@ -41,6 +43,7 @@ class Schedule extends Model
         'subject_id',
         'teacher_id',
         'academic_year_id',
+        'semester_id',
         'day_of_week',
         'start_time',
         'end_time',
@@ -102,6 +105,16 @@ class Schedule extends Model
     }
 
     /**
+     * Get the semester for this schedule.
+     *
+     * @return BelongsTo<Semester, Schedule>
+     */
+    public function semester(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class);
+    }
+
+    /**
      * Scope to get only active schedules.
      *
      * @param Builder<Schedule> $query
@@ -154,5 +167,16 @@ class Schedule extends Model
     public function scopeByTeacher(Builder $query, int $teacherId): Builder
     {
         return $query->where('teacher_id', $teacherId);
+    }
+
+    /**
+     * Scope to filter by semester.
+     *
+     * @param Builder<Schedule> $query
+     * @return Builder<Schedule>
+     */
+    public function scopeBySemester(Builder $query, int $semesterId): Builder
+    {
+        return $query->where('semester_id', $semesterId);
     }
 }

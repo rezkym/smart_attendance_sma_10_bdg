@@ -122,6 +122,13 @@
           </div>
 
           <div class="mb-5">
+            <label for="add-schedule-semester" class="form-label">Semester <span class="text-danger">*</span></label>
+            <select id="add-schedule-semester" name="semester_id" class="form-select" disabled>
+              <option value="">Pilih Tahun Ajaran Terlebih Dahulu</option>
+            </select>
+          </div>
+
+          <div class="mb-5">
             <label for="add-schedule-classroom" class="form-label">Classroom <span class="text-danger">*</span></label>
             <select id="add-schedule-classroom" name="classroom_id" class="select2 form-select">
               <option value="">Select Classroom</option>

@@ -516,6 +516,272 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // ==========================================
+  // NETWORK SCANNING & PAIRING
+  // ==========================================
+
+  const scanNetworkModal = document.getElementById('scanNetworkModal');
+  const ipRangeInput = document.getElementById('ip-range');
+  const btnStartScan = document.getElementById('btn-start-scan');
+  const scanProgress = document.getElementById('scan-progress');
+  const scanCurrentIp = document.getElementById('scan-current-ip');
+  const scanProgressCount = document.getElementById('scan-progress-count');
+  const scanProgressTotal = document.getElementById('scan-progress-total');
+  const scanProgressBar = document.getElementById('scan-progress-bar');
+  const discoveredDevicesBody = document.getElementById('discovered-devices-body');
+  const discoveredCount = document.getElementById('discovered-count');
+  const noDevicesRow = document.getElementById('no-devices-row');
+
+  let discoveredDevices = [];
+  let isScanning = false;
+
+  // Start scan button
+  if (btnStartScan) {
+    btnStartScan.addEventListener('click', function () {
+      if (isScanning) return;
+      const ipRange = ipRangeInput?.value.trim();
+      if (!ipRange) {
+        showAlert('error', 'Error', 'Please enter an IP range (e.g., 192.168.1.1-254)');
+        return;
+      }
+      startNetworkScan(ipRange);
+    });
+  }
+
+  // Reset modal on close
+  if (scanNetworkModal) {
+    scanNetworkModal.addEventListener('hidden.bs.modal', function () {
+      resetScanModal();
+    });
+  }
+
+  // Event delegation for pair buttons
+  if (discoveredDevicesBody) {
+    discoveredDevicesBody.addEventListener('click', function (e) {
+      const pairBtn = e.target.closest('.btn-pair-device');
+      if (pairBtn) {
+        const ip = pairBtn.getAttribute('data-ip');
+        const deviceCode = pairBtn.getAttribute('data-device-code');
+        pairDevice(ip, deviceCode);
+      }
+    });
+  }
+
+  function parseIpRange(rangeStr) {
+    // Supported formats: "192.168.1.1-254" or "192.168.1.100-200"
+    const match = rangeStr.match(/^(\d+\.\d+\.\d+)\.(\d+)-(\d+)$/);
+    if (!match) {
+      return null;
+    }
+    const prefix = match[1];
+    const start = parseInt(match[2], 10);
+    const end = parseInt(match[3], 10);
+    if (start < 1 || end > 254 || start > end) {
+      return null;
+    }
+    const ips = [];
+    for (let i = start; i <= end; i++) {
+      ips.push(`${prefix}.${i}`);
+    }
+    return ips;
+  }
+
+  async function startNetworkScan(rangeStr) {
+    const ips = parseIpRange(rangeStr);
+    if (!ips) {
+      showAlert('error', 'Invalid Format', 'Please enter a valid IP range (e.g., 192.168.1.1-254)');
+      return;
+    }
+
+    isScanning = true;
+    discoveredDevices = [];
+    updateDiscoveredTable();
+
+    // Show progress
+    scanProgress.style.display = 'block';
+    scanProgressTotal.textContent = ips.length;
+    scanProgressCount.textContent = '0';
+    scanProgressBar.style.width = '0%';
+    btnStartScan.disabled = true;
+    btnStartScan.innerHTML = '<i class="ri ri-loader-4-line me-1 spin"></i> Scanning...';
+
+    let scanned = 0;
+
+    // Scan in parallel batches of 10
+    const batchSize = 10;
+    for (let i = 0; i < ips.length; i += batchSize) {
+      const batch = ips.slice(i, i + batchSize);
+      const promises = batch.map(ip => identifyDevice(ip));
+      await Promise.all(promises);
+      scanned += batch.length;
+      scanProgressCount.textContent = scanned;
+      scanProgressBar.style.width = `${(scanned / ips.length) * 100}%`;
+      if (batch.length > 0) {
+        scanCurrentIp.textContent = batch[batch.length - 1];
+      }
+    }
+
+    isScanning = false;
+    btnStartScan.disabled = false;
+    btnStartScan.innerHTML = '<i class="ri ri-radar-line me-1"></i> Start Scan';
+    scanCurrentIp.textContent = 'Complete';
+
+    if (discoveredDevices.length === 0) {
+      showAlert('info', 'Scan Complete', 'No IoT devices found in the specified IP range.');
+    } else {
+      showAlert('success', 'Scan Complete', `Found ${discoveredDevices.length} device(s).`);
+    }
+  }
+
+  async function identifyDevice(ip) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
+
+      const response = await fetch(`http://${ip}/identify`, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.device_code) {
+          discoveredDevices.push({
+            ip: ip,
+            device_code: data.device_code,
+            firmware_version: data.firmware_version || '-',
+            is_configured: data.is_configured || false,
+            api_host: data.api_host || ''
+          });
+          updateDiscoveredTable();
+        }
+      }
+    } catch (error) {
+      // Device not found or timeout - ignore
+    }
+  }
+
+  function updateDiscoveredTable() {
+    discoveredCount.textContent = discoveredDevices.length;
+
+    if (discoveredDevices.length === 0) {
+      noDevicesRow.style.display = '';
+      return;
+    }
+
+    noDevicesRow.style.display = 'none';
+
+    // Clear existing rows except no-devices-row
+    const rows = discoveredDevicesBody.querySelectorAll('tr:not(#no-devices-row)');
+    rows.forEach(row => row.remove());
+
+    discoveredDevices.forEach(device => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><code>${device.ip}</code></td>
+        <td><span class="badge bg-label-info">${device.device_code}</span></td>
+        <td>${device.firmware_version}</td>
+        <td>${device.is_configured ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-warning">No</span>'}</td>
+        <td>
+          <button class="btn btn-sm btn-primary btn-pair-device" data-ip="${device.ip}" data-device-code="${device.device_code}">
+            <i class="ri ri-link me-1"></i> Pair
+          </button>
+        </td>
+      `;
+      discoveredDevicesBody.appendChild(row);
+    });
+  }
+
+  async function pairDevice(ip, deviceCode) {
+    try {
+      // Step 1: Get server config (host, port, path, api_key)
+      const configResponse = await fetch(`${devicesBaseUrl}/pairing/config`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' }
+      });
+      const configData = await configResponse.json();
+
+      if (!configData.success) {
+        showAlert('error', 'Error', 'Failed to get server configuration.');
+        return;
+      }
+
+      const config = configData.data;
+
+      // Step 2: Send pairing request to ESP32
+      const pairFormData = new URLSearchParams();
+      pairFormData.append('host', config.host);
+      pairFormData.append('port', config.port);
+      pairFormData.append('path', config.path);
+      pairFormData.append('key', config.api_key);
+
+      const pairResponse = await fetch(`http://${ip}/pair`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: pairFormData.toString()
+      });
+
+      if (!pairResponse.ok) {
+        showAlert('error', 'Pairing Failed', 'Failed to send configuration to device.');
+        return;
+      }
+
+      const pairData = await pairResponse.json();
+      if (!pairData.success) {
+        showAlert('error', 'Pairing Failed', pairData.message || 'Device rejected the pairing request.');
+        return;
+      }
+
+      // Step 3: Complete pairing on backend
+      const completeResponse = await fetch(`${devicesBaseUrl}/pairing/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          device_code: deviceCode,
+          ip_address: ip,
+          api_key: config.api_key, // Send the same api_key that was sent to ESP32
+          firmware_version: pairData.firmware_version || null
+        })
+      });
+
+      const completeData = await completeResponse.json();
+
+      if (completeData.success) {
+        // Close modal and refresh table
+        bootstrap.Modal.getInstance(scanNetworkModal)?.hide();
+        dt_Device.ajax.reload();
+        loadStats();
+
+        // Show API key if new device
+        if (completeData.data?.api_key) {
+          showApiKeyModal(completeData.data.api_key);
+        } else {
+          showAlert('success', 'Device Paired!', `${deviceCode} has been paired successfully.`);
+        }
+      } else {
+        showAlert('error', 'Error', completeData.message || 'Failed to complete pairing.');
+      }
+    } catch (error) {
+      console.error('Pairing error:', error);
+      showAlert('error', 'Error', 'An error occurred during pairing. Make sure the device is reachable.');
+    }
+  }
+
+  function resetScanModal() {
+    if (!isScanning) {
+      discoveredDevices = [];
+      updateDiscoveredTable();
+      scanProgress.style.display = 'none';
+      scanProgressBar.style.width = '0%';
+      scanCurrentIp.textContent = '-';
+    }
+  }
+
   // Filter form control styling
   setTimeout(() => {
     const elementsToModify = [
@@ -547,3 +813,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, 100);
 });
+

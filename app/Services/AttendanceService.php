@@ -11,6 +11,7 @@ use App\Models\Schedule;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use App\Repositories\Contracts\ClassroomRepositoryInterface;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
+use App\Repositories\Contracts\StudentEnrollmentRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,7 +25,8 @@ class AttendanceService
         protected AttendanceRepositoryInterface $attendanceRepository,
         protected StudentRepositoryInterface $studentRepository,
         protected ScheduleRepositoryInterface $scheduleRepository,
-        protected ClassroomRepositoryInterface $classroomRepository
+        protected ClassroomRepositoryInterface $classroomRepository,
+        protected StudentEnrollmentRepositoryInterface $enrollmentRepository
     ) {}
 
     /**
@@ -133,9 +135,12 @@ class AttendanceService
         $userName = $student->user?->name ?? 'Unknown';
         $studentId = $student->nis ?? $student->nisn ?? '';
 
+        // Get classroom ID via enrollment (with fallback to legacy classroom_id)
+        $classroomId = $this->getStudentClassroomId($student);
+
         // ===== SCENARIO 1: Check for ACTIVE schedule =====
         $activeSchedule = $this->scheduleRepository->findActiveByClassroomDayAndTime(
-            $student->classroom_id,
+            $classroomId,
             $dayOfWeek,
             $timeString
         );
@@ -182,7 +187,7 @@ class AttendanceService
 
         // ===== SCENARIO 2 & 3: No active schedule, check past schedule =====
         $pastSchedule = $this->scheduleRepository->findRecentPastSchedule(
-            $student->classroom_id,
+            $classroomId,
             $dayOfWeek,
             $timeString,
             3 // Lookback 3 hours
@@ -388,7 +393,8 @@ class AttendanceService
      */
     public function getClassroomAttendance(int $classroomId, Carbon $date): array
     {
-        $students = $this->studentRepository->getByClassroom($classroomId);
+        // Phase G: Use enrollment-based lookup
+        $students = $this->studentRepository->getByClassroomViaEnrollment($classroomId);
         $attendances = $this->attendanceRepository->getByClassroomAndDate($classroomId, $date);
 
         return [
@@ -473,5 +479,16 @@ class AttendanceService
         }
 
         return AttendanceStatus::LATE;
+    }
+
+    /**
+     * Get the classroom ID for a student via enrollment.
+     * Phase G: Enrollment is the only source (no fallback).
+     */
+    private function getStudentClassroomId(\App\Models\Student $student): ?int
+    {
+        $currentEnrollment = $this->enrollmentRepository->getCurrentEnrollment($student->id);
+
+        return $currentEnrollment?->classroom_id;
     }
 }

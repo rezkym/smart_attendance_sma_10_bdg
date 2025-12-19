@@ -73,13 +73,14 @@ class StudentService
     }
 
     /**
-     * Get students by classroom ID.
+     * Get students by classroom ID (via enrollment).
+     * Phase G: Uses enrollment instead of direct classroom_id.
      *
      * @return Collection<int, Student>
      */
     public function getStudentsByClassroom(int $classroomId): Collection
     {
-        return $this->studentRepository->getByClassroom($classroomId);
+        return $this->studentRepository->getByClassroomViaEnrollment($classroomId);
     }
 
     /**

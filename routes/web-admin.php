@@ -13,7 +13,10 @@ use App\Http\Controllers\admin\ScheduleController;
 use App\Http\Controllers\admin\StudentController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\IotDeviceController;
+use App\Http\Controllers\admin\IotDevicePairingController;
 use App\Http\Controllers\admin\IotLogController;
+use App\Http\Controllers\Admin\RfidCardController;
+use App\Http\Controllers\Admin\SemesterController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -39,6 +42,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::resource('academic-years', AcademicYearController::class)->except(['create', 'edit']);
     });
 
+    // Semester Management - requires semesters.view permission
+    Route::middleware(['permission:semesters.view'])->group(function () {
+        Route::get('semesters/list', [SemesterController::class, 'list'])->name('semesters.list');
+        Route::get('semesters/by-academic-year/{academic_year}', [SemesterController::class, 'byAcademicYear'])->name('semesters.by-academic-year');
+        Route::post('semesters/{semester}/set-active', [SemesterController::class, 'setActive'])->name('semesters.set-active');
+        Route::resource('semesters', SemesterController::class)->except(['create', 'edit']);
+    });
+
     // Subject Management - requires subjects.view permission
     Route::middleware(['permission:subjects.view'])->group(function () {
         Route::get('subjects/list', [SubjectController::class, 'list'])->name('subjects.list');
@@ -58,6 +69,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('students/available-classrooms', [StudentController::class, 'availableClassrooms'])->name('students.available-classrooms');
         Route::get('students/available-users', [StudentController::class, 'availableUsers'])->name('students.available-users');
         Route::resource('students', StudentController::class)->except(['create', 'edit']);
+    });
+
+    // Student Enrollment Management - requires student-enrollments.view permission
+    Route::middleware(['permission:student-enrollments.view'])->group(function () {
+        Route::get('student-enrollments/list', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'list'])->name('student-enrollments.list');
+        Route::get('student-enrollments/by-student/{student}', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'byStudent'])->name('student-enrollments.by-student');
+        Route::get('student-enrollments/by-classroom/{classroom}', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'byClassroom'])->name('student-enrollments.by-classroom');
+        Route::get('student-enrollments/available-students', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'availableStudents'])->name('student-enrollments.available-students');
+        Route::get('student-enrollments/available-classrooms', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'availableClassrooms'])->name('student-enrollments.available-classrooms');
+        Route::get('student-enrollments/statuses', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'statuses'])->name('student-enrollments.statuses');
+        Route::post('student-enrollments/transfer', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'transfer'])->name('student-enrollments.transfer')->middleware('permission:student-enrollments.transfer');
+        Route::post('student-enrollments/graduate', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'graduate'])->name('student-enrollments.graduate')->middleware('permission:student-enrollments.graduate');
+        Route::post('student-enrollments/drop', [\App\Http\Controllers\Admin\StudentEnrollmentController::class, 'drop'])->name('student-enrollments.drop')->middleware('permission:student-enrollments.update');
+        Route::resource('student-enrollments', \App\Http\Controllers\Admin\StudentEnrollmentController::class)->except(['create', 'edit']);
     });
 
     // Roles Management - requires roles.view permission
@@ -128,6 +153,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('iot-devices/statuses', [IotDeviceController::class, 'statuses'])->name('iot-devices.statuses');
         Route::get('iot-devices/stats', [IotDeviceController::class, 'stats'])->name('iot-devices.stats');
         Route::post('iot-devices/{iot_device}/regenerate-key', [IotDeviceController::class, 'regenerateKey'])->name('iot-devices.regenerate-key');
+        
+        // Device Pairing Routes
+        Route::get('iot-devices/pairing/config', [IotDevicePairingController::class, 'config'])->name('iot-devices.pairing.config');
+        Route::post('iot-devices/pairing/complete', [IotDevicePairingController::class, 'complete'])->name('iot-devices.pairing.complete');
+        
         Route::resource('iot-devices', IotDeviceController::class)->except(['create', 'edit']);
     });
 
@@ -141,6 +171,26 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             Route::get('iot-logs/export', [IotLogController::class, 'export'])->name('iot-logs.export');
         });
         Route::resource('iot-logs', IotLogController::class)->only(['index', 'show']);
+    });
+
+    // RFID Card Management - requires rfid-cards.view permission
+    Route::middleware(['permission:rfid-cards.view'])->group(function () {
+        Route::get('rfid-cards/list', [RfidCardController::class, 'list'])->name('rfid-cards.list');
+        Route::get('rfid-cards/statuses', [RfidCardController::class, 'statuses'])->name('rfid-cards.statuses');
+        Route::get('rfid-cards/available-users', [RfidCardController::class, 'availableUsers'])->name('rfid-cards.available-users');
+        Route::get('rfid-cards/stats', [RfidCardController::class, 'stats'])->name('rfid-cards.stats');
+        Route::get('rfid-cards/card-by-user/{user}', [RfidCardController::class, 'cardByUser'])->name('rfid-cards.card-by-user');
+        Route::post('rfid-cards/{rfid_card}/block', [RfidCardController::class, 'block'])->name('rfid-cards.block')->middleware('permission:rfid-cards.block');
+        Route::post('rfid-cards/{rfid_card}/unblock', [RfidCardController::class, 'unblock'])->name('rfid-cards.unblock')->middleware('permission:rfid-cards.block');
+        
+        // Quick Scan Registration routes
+        Route::get('rfid-cards/available-devices', [RfidCardController::class, 'availableDevices'])->name('rfid-cards.available-devices');
+        Route::get('rfid-cards/available-users-without-card', [RfidCardController::class, 'availableUsersWithoutCard'])->name('rfid-cards.available-users-without-card');
+        Route::post('rfid-cards/start-registration', [RfidCardController::class, 'startRegistrationMode'])->name('rfid-cards.start-registration')->middleware('permission:rfid-cards.create');
+        Route::post('rfid-cards/check-registration', [RfidCardController::class, 'checkRegistrationStatus'])->name('rfid-cards.check-registration');
+        Route::post('rfid-cards/cancel-registration', [RfidCardController::class, 'cancelRegistration'])->name('rfid-cards.cancel-registration');
+        
+        Route::resource('rfid-cards', RfidCardController::class)->except(['create', 'edit']);
     });
 });
 

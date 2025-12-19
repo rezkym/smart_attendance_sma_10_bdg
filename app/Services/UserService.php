@@ -19,6 +19,16 @@ class UserService
     ) {}
 
     /**
+     * Get all users
+     *
+     * @return Collection<int, User>
+     */
+    public function getAllUsers(): Collection
+    {
+        return $this->userRepository->getAllUsers();
+    }
+
+    /**
      * Get all users with roles
      *
      * @return Collection<int, User>

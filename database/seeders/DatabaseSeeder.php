@@ -28,19 +28,20 @@ class DatabaseSeeder extends Seeder
             // Phase 1: Core (Independent)
             PermissionRoleSeeder::class,
             DefaultUserSeeder::class,
-            AcademicYearSeeder::class,
-            SubjectSeeder::class,
+            // AcademicYearSeeder::class,
+            // SubjectSeeder::class,
 
             // Phase 2: Users with Roles
-            StudentUserSeeder::class,
-            TeacherSeeder::class,
+            // StudentUserSeeder::class,
+            // TeacherSeeder::class,
 
             // Phase 3: Master Data with Dependencies
-            ClassroomSeeder::class,
-            StudentSeeder::class,
+            // ClassroomSeeder::class,
+            // StudentSeeder::class,
+            // StudentEnrollmentSeeder::class,
 
             // Phase 4: Complex Dependencies
-            ScheduleSeeder::class,
+            // ScheduleSeeder::class,
         ]);
     }
 }

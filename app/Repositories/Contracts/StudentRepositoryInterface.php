@@ -86,4 +86,12 @@ interface StudentRepositoryInterface
      * @return Collection<int, Student>
      */
     public function getByClassroom(int $classroomId): Collection;
+
+    /**
+     * Get students by classroom via enrollment table (Phase C).
+     * Falls back to classroom_id if no enrollments found.
+     *
+     * @return Collection<int, Student>
+     */
+    public function getByClassroomViaEnrollment(int $classroomId, ?int $academicYearId = null): Collection;
 }

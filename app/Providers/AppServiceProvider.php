@@ -17,11 +17,13 @@ use App\Repositories\Contracts\ClassroomRepositoryInterface;
 use App\Repositories\IotDeviceRepository;
 use App\Repositories\IotLogRepository;
 use App\Repositories\ScheduleRepository;
+use App\Repositories\SemesterRepository;
 use App\Repositories\SubjectRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\StudentRepository;
 use App\Repositories\TeacherRepository;
 use App\Repositories\ClassroomRepository;
+use App\Repositories\Contracts\SemesterRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Vite;
 
@@ -42,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AttendanceRepositoryInterface::class, AttendanceRepository::class);
         $this->app->bind(IotDeviceRepositoryInterface::class, IotDeviceRepository::class);
         $this->app->bind(IotLogRepositoryInterface::class, IotLogRepository::class);
+        $this->app->bind(SemesterRepositoryInterface::class, SemesterRepository::class);
+        $this->app->bind(\App\Repositories\Contracts\StudentEnrollmentRepositoryInterface::class, \App\Repositories\StudentEnrollmentRepository::class);
+        $this->app->bind(\App\Repositories\Contracts\RfidCardRepositoryInterface::class, \App\Repositories\RfidCardRepository::class);
     }
 
     /**

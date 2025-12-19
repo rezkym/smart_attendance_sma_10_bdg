@@ -88,7 +88,7 @@ interface ScheduleRepositoryInterface
      */
     public function hasConflict(
         int $classroomId,
-        int $academicYearId,
+        int $semesterId,
         int $dayOfWeek,
         string $startTime,
         ?int $excludeScheduleId = null

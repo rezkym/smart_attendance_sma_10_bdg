@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\SemesterType;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Schedule;
+use App\Models\Semester;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Seeder;
@@ -24,6 +26,27 @@ class ScheduleSeeder extends Seeder
         if ($activeAcademicYear === null) {
             $this->command->error('No active academic year found. Please run AcademicYearSeeder first.');
             return;
+        }
+
+        // Get or create active semester for this academic year
+        $activeSemester = Semester::where('academic_year_id', $activeAcademicYear->id)
+            ->where('is_active', true)
+            ->first();
+
+        if ($activeSemester === null) {
+            // Create ODD semester if none exists
+            $activeSemester = Semester::firstOrCreate(
+                [
+                    'academic_year_id' => $activeAcademicYear->id,
+                    'type' => SemesterType::ODD,
+                ],
+                [
+                    'start_date' => $activeAcademicYear->start_date,
+                    'end_date' => $activeAcademicYear->start_date->copy()->addMonths(6),
+                    'is_active' => true,
+                ]
+            );
+            $this->command->info("Created semester {$activeSemester->type->label()} for {$activeAcademicYear->name}.");
         }
 
         // Get active classrooms
@@ -76,6 +99,7 @@ class ScheduleSeeder extends Seeder
 
                     $exists = Schedule::where('classroom_id', $classroom->id)
                         ->where('academic_year_id', $activeAcademicYear->id)
+                        ->where('semester_id', $activeSemester->id)
                         ->where('day_of_week', $day)
                         ->where('start_time', $slot['start'])
                         ->exists();
@@ -86,6 +110,7 @@ class ScheduleSeeder extends Seeder
                             'subject_id' => $subject->id,
                             'teacher_id' => $teacher->id,
                             'academic_year_id' => $activeAcademicYear->id,
+                            'semester_id' => $activeSemester->id,
                             'day_of_week' => $day,
                             'start_time' => $slot['start'],
                             'end_time' => $slot['end'],

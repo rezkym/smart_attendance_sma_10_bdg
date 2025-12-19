@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Semester> $semesters
  */
 class AcademicYear extends Model
 {
@@ -65,5 +67,15 @@ class AcademicYear extends Model
     public function scopeLatest(Builder $query): Builder
     {
         return $query->orderBy('start_date', 'desc');
+    }
+
+    /**
+     * Get the semesters for this academic year.
+     *
+     * @return HasMany<Semester>
+     */
+    public function semesters(): HasMany
+    {
+        return $this->hasMany(Semester::class);
     }
 }

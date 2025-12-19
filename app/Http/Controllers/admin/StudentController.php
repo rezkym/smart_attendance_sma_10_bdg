@@ -50,7 +50,8 @@ class StudentController extends Controller
                 return $student->user?->gender?->label() ?? '';
             })
             ->addColumn('classroom_name', function ($student) {
-                return $student->classroom?->name ?? '-';
+                // Phase G: Get classroom via enrollment
+                return $student->currentClassroom()?->name ?? '-';
             })
             ->addColumn('status', function ($student) {
                 return $student->is_active;
@@ -112,7 +113,7 @@ class StudentController extends Controller
                 'nis' => $request->validated('nis'),
                 'rfid_card_number' => $request->validated('rfid_card_number'),
                 'enrollment_date' => $request->validated('enrollment_date'),
-                'classroom_id' => $request->validated('classroom_id'),
+                // classroom_id removed - Phase G: use enrollment
                 'is_active' => $request->validated('is_active', true),
                 'notes' => $request->validated('notes'),
             ]);
@@ -163,7 +164,7 @@ class StudentController extends Controller
                     'nis' => $request->validated('nis'),
                     'rfid_card_number' => $request->validated('rfid_card_number'),
                     'enrollment_date' => $request->validated('enrollment_date'),
-                    'classroom_id' => $request->validated('classroom_id'),
+                    // classroom_id removed - Phase G: use enrollment
                     'is_active' => $request->validated('is_active', true),
                     'notes' => $request->validated('notes'),
                 ]
@@ -204,18 +205,22 @@ class StudentController extends Controller
 
     /**
      * Format student data for JSON response including user profile.
+     * Phase G: Uses enrollment-based classroom lookup.
      *
      * @return array<string, mixed>
      */
     private function formatStudentData(\App\Models\Student $student): array
     {
         $user = $student->user;
+        $currentClassroom = $student->currentClassroom();
+        $currentEnrollment = $student->currentEnrollment();
 
         return [
             'id' => $student->id,
             'user_id' => $student->user_id,
-            'classroom_id' => $student->classroom_id,
-            'classroom_name' => $student->classroom?->name,
+            // Phase G: classroom via enrollment
+            'classroom_id' => $currentEnrollment?->classroom_id,
+            'classroom_name' => $currentClassroom?->name,
             // Student specific fields
             'nisn' => $student->nisn,
             'nis' => $student->nis,

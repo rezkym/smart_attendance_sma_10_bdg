@@ -21,7 +21,7 @@ class StudentRepository implements StudentRepositoryInterface
     public function getAll(): Collection
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->orderBy('id', 'desc')
             ->get();
     }
@@ -32,7 +32,7 @@ class StudentRepository implements StudentRepositoryInterface
     public function getAllActive(): Collection
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->active()
             ->orderBy('id', 'desc')
             ->get();
@@ -41,14 +41,14 @@ class StudentRepository implements StudentRepositoryInterface
     public function findById(int $studentId): ?Student
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->find($studentId);
     }
 
     public function findByNisn(string $nisn): ?Student
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->where('nisn', $nisn)
             ->first();
     }
@@ -56,15 +56,29 @@ class StudentRepository implements StudentRepositoryInterface
     public function findByNis(string $nis): ?Student
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->where('nis', $nis)
             ->first();
     }
 
     public function findByRfid(string $rfidCardNumber): ?Student
     {
+        // Step 1: Try new rfid_cards table first (active card with user_id)
+        $rfidCard = \App\Models\RfidCard::where('card_uid', $rfidCardNumber)
+            ->where('status', \App\Enums\CardStatus::ACTIVE)
+            ->whereNotNull('user_id')
+            ->first();
+
+        if ($rfidCard !== null) {
+            return $this->model->newQuery()
+                ->with(['user', 'enrollments.classroom'])
+                ->whereHas('user', fn($query) => $query->where('id', $rfidCard->user_id))
+                ->first();
+        }
+
+        // Step 2: Fallback to legacy students.rfid_card_number column
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->where('rfid_card_number', $rfidCardNumber)
             ->first();
     }
@@ -76,7 +90,7 @@ class StudentRepository implements StudentRepositoryInterface
     {
         $student = $this->model->newQuery()->create($data);
 
-        return $student->load(['user', 'classroom']);
+        return $student->load(['user', 'enrollments.classroom']);
     }
 
     /**
@@ -86,7 +100,7 @@ class StudentRepository implements StudentRepositoryInterface
     {
         $student->update($data);
 
-        return $student->fresh()->load(['user', 'classroom']);
+        return $student->fresh()->load(['user', 'enrollments.classroom']);
     }
 
     public function delete(Student $student): bool
@@ -110,7 +124,7 @@ class StudentRepository implements StudentRepositoryInterface
     public function getDataTableQuery(): Builder
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->orderBy('id', 'desc');
     }
 
@@ -120,8 +134,30 @@ class StudentRepository implements StudentRepositoryInterface
     public function getByClassroom(int $classroomId): Collection
     {
         return $this->model->newQuery()
-            ->with(['user', 'classroom'])
+            ->with(['user', 'enrollments.classroom'])
             ->inClassroom($classroomId)
+            ->active()
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Get students by classroom via enrollment table (Phase G - no fallback).
+     *
+     * @return Collection<int, Student>
+     */
+    public function getByClassroomViaEnrollment(int $classroomId, ?int $academicYearId = null): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['user', 'enrollments.classroom'])
+            ->whereHas('enrollments', function ($q) use ($classroomId, $academicYearId) {
+                $q->where('classroom_id', $classroomId)
+                    ->where('status', \App\Enums\EnrollmentStatus::ACTIVE);
+
+                if ($academicYearId !== null) {
+                    $q->where('academic_year_id', $academicYearId);
+                }
+            })
             ->active()
             ->orderBy('id')
             ->get();

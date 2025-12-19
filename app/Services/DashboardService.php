@@ -139,7 +139,8 @@ class DashboardService
                 'name' => $classroom->name,
                 'grade_level' => $classroom->grade_level,
                 'attendance_rate' => (float) $stats['attendance_rate'],
-                'total_students' => $this->studentRepository->getByClassroom($classroom->id)->count(),
+                // Phase F: Use enrollment-based student count with fallback
+                'total_students' => $this->studentRepository->getByClassroomViaEnrollment($classroom->id)->count(),
             ];
         }
 

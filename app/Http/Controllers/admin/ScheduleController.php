@@ -341,6 +341,8 @@ class ScheduleController extends Controller
             'teacher_name' => $schedule->teacher?->user?->name ?? '',
             'academic_year_id' => $schedule->academic_year_id,
             'academic_year_name' => $schedule->academicYear->name ?? '',
+            'semester_id' => $schedule->semester_id,
+            'semester_type' => $schedule->semester?->type?->label() ?? '',
             'day_of_week' => $schedule->day_of_week->value,
             'day_label' => $schedule->day_of_week->label(),
             'start_time' => $schedule->start_time,

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Admin\RfidCardController;
 use App\Http\Middleware\AuthenticateIotDevice;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([AuthenticateIotDevice::class, 'throttle:60,1'])->group(function () {
     Route::post('/attendance', [AttendanceController::class, 'store']);
 });
+
+// RFID Card Registration Callback (called by ESP32 during Quick Scan)
+// No auth required - session ID acts as temporary token
+Route::post('/rfid-cards/receive-scan/{sessionId}', [RfidCardController::class, 'receiveScannedCard'])
+    ->name('api.rfid-cards.receive-scan');

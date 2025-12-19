@@ -146,10 +146,10 @@ class ReportService
         return [
             'student' => [
                 'id' => $student->id,
-                'name' => $student->user?->name ?? 'Unknown',
+                'name' => $student->user?->display_name ?? 'Unknown',
                 'nisn' => $student->nisn,
                 'nis' => $student->nis,
-                'classroom' => $student->classroom?->name ?? '-',
+                'classroom' => $student->currentClassroom()?->name ?? '-',
             ],
             'summary' => $summary,
             'records' => $records,
@@ -179,7 +179,9 @@ class ReportService
         }
 
         $attendances = $this->attendanceRepository->getByClassroomAndDate($classroomId, $date);
-        $students = $this->studentRepository->getByClassroom($classroomId);
+
+        // Phase E: Use enrollment-based student lookup with fallback
+        $students = $this->studentRepository->getByClassroomViaEnrollment($classroomId);
 
         $studentAttendanceMap = $attendances->keyBy('student_id');
 
@@ -198,7 +200,7 @@ class ReportService
 
             return [
                 'id' => $student->id,
-                'name' => $student->user?->name ?? 'Unknown',
+                'name' => $student->user?->display_name ?? 'Unknown',
                 'nisn' => $student->nisn,
                 'status' => $attendance?->status ?? AttendanceStatus::ABSENT->value,
                 'status_label' => $attendance
@@ -461,7 +463,8 @@ class ReportService
      */
     private function getStudentAttendanceSummary(int $classroomId, Carbon $startDate, Carbon $endDate): array
     {
-        $students = $this->studentRepository->getByClassroom($classroomId);
+        // Phase E: Use enrollment-based student lookup with fallback
+        $students = $this->studentRepository->getByClassroomViaEnrollment($classroomId);
         $attendances = $this->attendanceRepository->getByClassroomAndDateRange($classroomId, $startDate, $endDate);
 
         $studentSummary = [];
@@ -480,7 +483,7 @@ class ReportService
 
             $studentSummary[] = [
                 'id' => $student->id,
-                'name' => $student->user?->name ?? 'Unknown',
+                'name' => $student->user?->display_name ?? 'Unknown',
                 'nisn' => $student->nisn,
                 'present' => $statusCounts['present'],
                 'late' => $statusCounts['late'],

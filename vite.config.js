@@ -86,5 +86,13 @@ export default defineConfig({
     commonjsOptions: {
       include: [/node_modules/] // Helps with importing CommonJS modules
     }
+  },
+  server: {
+    host: '0.0.0.0',
+    cors: true,
+    hmr: {
+      host: process.env.VITE_HMR_HOST || 'localhost'
+    }
   }
 });
+

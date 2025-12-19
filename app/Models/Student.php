@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\EnrollmentStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
  * @property int $user_id
- * @property int|null $classroom_id
  * @property string $nisn
  * @property string $nis
  * @property string|null $rfid_card_number
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read User $user
- * @property-read Classroom|null $classroom
+ * @property-read Classroom|null $currentClassroom
  * @property-read string $display_name
  */
 class Student extends Model
@@ -36,7 +37,7 @@ class Student extends Model
      */
     protected $fillable = [
         'user_id',
-        'classroom_id',
+        // classroom_id removed - Phase G: use enrollment instead
         'nisn',
         'nis',
         'rfid_card_number',
@@ -85,13 +86,33 @@ class Student extends Model
     }
 
     /**
-     * Get the classroom this student belongs to.
+     * Get all enrollments for this student.
      *
-     * @return BelongsTo<Classroom, Student>
+     * @return HasMany<StudentEnrollment>
      */
-    public function classroom(): BelongsTo
+    public function enrollments(): HasMany
     {
-        return $this->belongsTo(Classroom::class);
+        return $this->hasMany(StudentEnrollment::class);
+    }
+
+    /**
+     * Get the current active enrollment for this student.
+     */
+    public function currentEnrollment(): ?StudentEnrollment
+    {
+        return $this->enrollments()
+            ->where('status', EnrollmentStatus::ACTIVE)
+            ->latest('enrolled_at')
+            ->first();
+    }
+
+    /**
+     * Get the current classroom via enrollment (Phase G replacement for direct classroom relationship).
+     */
+    public function currentClassroom(): ?Classroom
+    {
+        $enrollment = $this->currentEnrollment();
+        return $enrollment?->classroom;
     }
 
     /**
@@ -106,14 +127,17 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter by classroom.
+     * Scope to filter by classroom via enrollment (Phase G replacement).
      *
      * @param Builder<Student> $query
      * @return Builder<Student>
      */
     public function scopeInClassroom(Builder $query, int $classroomId): Builder
     {
-        return $query->where('classroom_id', $classroomId);
+        return $query->whereHas('enrollments', function ($q) use ($classroomId) {
+            $q->where('classroom_id', $classroomId)
+                ->where('status', EnrollmentStatus::ACTIVE);
+        });
     }
 }
 

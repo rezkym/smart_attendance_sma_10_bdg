@@ -26,6 +26,11 @@
         "academic-years.update",
         "academic-years.delete",
 
+        "semesters.view",
+        "semesters.create",
+        "semesters.update",
+        "semesters.delete",
+
         "students.view",
         "students.create",
         "students.update",
@@ -75,7 +80,20 @@
         "iot-devices.regenerate-key",
 
         "iot-logs.view",
-        "iot-logs.export"
+        "iot-logs.export",
+
+        "student-enrollments.view",
+        "student-enrollments.create",
+        "student-enrollments.update",
+        "student-enrollments.delete",
+        "student-enrollments.transfer",
+        "student-enrollments.graduate",
+
+        "rfid-cards.view",
+        "rfid-cards.create",
+        "rfid-cards.edit",
+        "rfid-cards.delete",
+        "rfid-cards.block"
       ]
     },
     {

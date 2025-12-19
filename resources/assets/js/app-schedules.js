@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const addNewScheduleForm = document.getElementById('addNewScheduleForm');
   const scheduleIdInput = document.getElementById('schedule_id');
   const academicYearSelect = document.getElementById('add-schedule-academic-year');
+  const semesterSelect = document.getElementById('add-schedule-semester');
   const classroomSelect = document.getElementById('add-schedule-classroom');
   const subjectSelect = document.getElementById('add-schedule-subject');
   const teacherSelect = document.getElementById('add-schedule-teacher');
@@ -24,8 +25,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Base URLs
   const schedulesBaseUrl = '/admin/schedules';
+  const semestersBaseUrl = '/admin/semesters';
   let isEditMode = false;
   let select2Initialized = false;
+  let pendingSemesterId = null; // Store semester ID for edit mode
 
   // Day mapping for display (Indonesian)
   const dayNames = {
@@ -106,6 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
               if (selectedData.academic_year_id) {
                 $(academicYearSelect).val(selectedData.academic_year_id).trigger('change');
+                // Store semester ID to set after semesters are loaded
+                if (selectedData.semester_id) {
+                  pendingSemesterId = selectedData.semester_id;
+                }
               }
               if (selectedData.classroom_id) {
                 $(classroomSelect).val(selectedData.classroom_id).trigger('change');
@@ -123,6 +130,54 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(error => {
         console.error('Error loading dropdown data:', error);
       });
+  }
+
+  // Load semesters for selected academic year
+  function loadSemestersByAcademicYear(academicYearId) {
+    if (!academicYearId) {
+      semesterSelect.innerHTML = '<option value="">Pilih Tahun Ajaran Terlebih Dahulu</option>';
+      semesterSelect.disabled = true;
+      return;
+    }
+
+    semesterSelect.disabled = true;
+    semesterSelect.innerHTML = '<option value="">Loading...</option>';
+
+    fetch(`${semestersBaseUrl}/by-academic-year/${academicYearId}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          semesterSelect.innerHTML = '<option value="">Pilih Semester</option>';
+          data.data.forEach(semester => {
+            const isActive = semester.is_active ? ' (Aktif)' : '';
+            const option = document.createElement('option');
+            option.value = semester.id;
+            option.textContent = `${semester.label}${isActive}`;
+            semesterSelect.appendChild(option);
+          });
+          semesterSelect.disabled = false;
+
+          // Set pending semester ID if in edit mode
+          if (pendingSemesterId) {
+            semesterSelect.value = pendingSemesterId;
+            pendingSemesterId = null;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading semesters:', error);
+        semesterSelect.innerHTML = '<option value="">Error loading semesters</option>';
+      });
+  }
+
+  // Academic year change handler
+  if (academicYearSelect) {
+    $(academicYearSelect).on('change', function() {
+      loadSemestersByAcademicYear(this.value);
+    });
   }
 
   // Format time for display (HH:MM - HH:MM)
@@ -319,6 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const id = scheduleIdInput?.value;
       const academicYearId = $(academicYearSelect).val();
+      const semesterId = semesterSelect?.value;
       const classroomId = $(classroomSelect).val();
       const subjectId = $(subjectSelect).val();
       const teacherId = $(teacherSelect).val();
@@ -329,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const isActive = isActiveInput?.checked || false;
 
       // Validation
-      if (!academicYearId || !classroomId || !subjectId || !teacherId || !dayOfWeek || !startTime || !endTime) {
+      if (!academicYearId || !semesterId || !classroomId || !subjectId || !teacherId || !dayOfWeek || !startTime || !endTime) {
         showAlert('error', 'Validation Error', 'Please fill in all required fields.');
         return;
       }
@@ -345,6 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const payload = {
         academic_year_id: parseInt(academicYearId),
+        semester_id: parseInt(semesterId),
         classroom_id: parseInt(classroomId),
         subject_id: parseInt(subjectId),
         teacher_id: parseInt(teacherId),
@@ -405,6 +462,13 @@ document.addEventListener('DOMContentLoaded', function () {
     $(subjectSelect).val('').trigger('change');
     $(teacherSelect).val('').trigger('change');
 
+    // Reset semester dropdown
+    if (semesterSelect) {
+      semesterSelect.innerHTML = '<option value="">Pilih Tahun Ajaran Terlebih Dahulu</option>';
+      semesterSelect.disabled = true;
+    }
+
+    pendingSemesterId = null;
     isEditMode = false;
   }
 

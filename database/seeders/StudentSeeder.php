@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -13,6 +12,7 @@ class StudentSeeder extends Seeder
 {
     /**
      * Seed the students table by linking existing student users to student profiles.
+     * Note: Classroom assignment is handled by StudentEnrollmentSeeder (Phase G).
      */
     public function run(): void
     {
@@ -26,10 +26,6 @@ class StudentSeeder extends Seeder
             return;
         }
 
-        // Get first classroom for assignment
-        $classroom = Classroom::where('is_active', true)->first();
-
-        $classroomId = $classroom?->id;
         $nisnPrefix = '00' . date('Y');
         $nisPrefix = date('y');
 
@@ -43,7 +39,7 @@ class StudentSeeder extends Seeder
                 [
                     'nisn' => $nisn,
                     'nis' => $nis,
-                    'classroom_id' => $classroomId,
+                    // classroom_id removed - enrollment handles class assignment (Phase G)
                     'enrollment_date' => now()->subMonths(rand(1, 24)),
                     'rfid_card_number' => 'RFID' . strtoupper(substr(md5((string) $user->id), 0, 8)),
                     'is_active' => true,

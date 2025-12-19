@@ -22,7 +22,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function getAll(): Collection
     {
         return $this->model->newQuery()
-            ->with(['classroom', 'subject', 'teacher.user', 'academicYear'])
+            ->with(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester'])
             ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
@@ -34,7 +34,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function getAllActive(): Collection
     {
         return $this->model->newQuery()
-            ->with(['classroom', 'subject', 'teacher.user', 'academicYear'])
+            ->with(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester'])
             ->active()
             ->orderBy('day_of_week')
             ->orderBy('start_time')
@@ -44,7 +44,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function findById(int $scheduleId): ?Schedule
     {
         return $this->model->newQuery()
-            ->with(['classroom', 'subject', 'teacher.user', 'academicYear'])
+            ->with(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester'])
             ->find($scheduleId);
     }
 
@@ -160,14 +160,14 @@ class ScheduleRepository implements ScheduleRepositoryInterface
 
     public function hasConflict(
         int $classroomId,
-        int $academicYearId,
+        int $semesterId,
         int $dayOfWeek,
         string $startTime,
         ?int $excludeScheduleId = null
     ): bool {
         $query = $this->model->newQuery()
             ->where('classroom_id', $classroomId)
-            ->where('academic_year_id', $academicYearId)
+            ->where('semester_id', $semesterId)
             ->where('day_of_week', $dayOfWeek)
             ->where('start_time', $startTime);
 
@@ -185,7 +185,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     {
         $schedule = $this->model->newQuery()->create($data);
 
-        return $schedule->load(['classroom', 'subject', 'teacher.user', 'academicYear']);
+        return $schedule->load(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester']);
     }
 
     /**
@@ -195,7 +195,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     {
         $schedule->update($data);
 
-        return $schedule->fresh()->load(['classroom', 'subject', 'teacher.user', 'academicYear']);
+        return $schedule->fresh()->load(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester']);
     }
 
     public function delete(Schedule $schedule): bool
@@ -219,7 +219,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function getDataTableQuery(): Builder
     {
         return $this->model->newQuery()
-            ->with(['classroom', 'subject', 'teacher.user', 'academicYear'])
+            ->with(['classroom', 'subject', 'teacher.user', 'academicYear', 'semester'])
             ->orderBy('day_of_week')
             ->orderBy('start_time');
     }

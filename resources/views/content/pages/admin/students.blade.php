@@ -200,11 +200,56 @@
           </div>
 
           <hr class="my-4">
-          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">Additional Information</h6>
+          <h6 class="mb-4 text-uppercase text-muted fw-semibold small">RFID Card</h6>
 
-          <div class="form-floating form-floating-outline mb-5">
-            <input type="text" class="form-control" id="add-student-rfid" placeholder="A1B2C3D4E5" name="rfid_card_number" maxlength="50" />
-            <label for="add-student-rfid">RFID Card Number</label>
+          <!-- RFID Card Info (Read-only, shown when editing) -->
+          <div id="rfid-card-info" class="mb-4" style="display: none;">
+            <div class="card bg-lighter border-0">
+              <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted d-block">Card UID</small>
+                    <span id="display-rfid-uid" class="fw-medium font-monospace fs-5">-</span>
+                  </div>
+                  <span id="display-rfid-status" class="badge bg-label-success">Active</span>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-6">
+                    <small class="text-muted d-block">Issued</small>
+                    <span id="display-rfid-issued" class="small">-</span>
+                  </div>
+                  <div class="col-6">
+                    <small class="text-muted d-block">Expires</small>
+                    <span id="display-rfid-expires" class="small">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <small class="text-muted mt-2 d-block">
+              <i class="ri ri-information-line"></i>
+              Kelola kartu RFID di <a href="/admin/rfid-cards">RFID Cards Management</a>
+            </small>
+          </div>
+
+          <!-- No RFID Card Message (shown when editing and no card) -->
+          <div id="no-rfid-card-info" class="mb-4" style="display: none;">
+            <div class="alert alert-secondary mb-2">
+              <i class="ri ri-bank-card-line me-1"></i> Belum ada kartu RFID terdaftar untuk user ini
+            </div>
+            <small class="text-muted">
+              <i class="ri ri-information-line"></i>
+              Daftarkan kartu di <a href="/admin/rfid-cards">RFID Cards Management</a> menggunakan Quick Scan
+            </small>
+          </div>
+
+          <!-- Info for Add Mode -->
+          <div id="rfid-add-mode-info" class="mb-4">
+            <div class="alert alert-light-secondary mb-2">
+              <i class="ri ri-information-line me-1"></i> Kartu RFID dapat didaftarkan setelah student dibuat
+            </div>
+            <small class="text-muted">
+              Gunakan <a href="/admin/rfid-cards">Quick Scan</a> untuk mendaftarkan kartu RFID
+            </small>
           </div>
 
           <div class="form-floating form-floating-outline mb-5">
@@ -224,6 +269,150 @@
             <button type="reset" class="btn btn-outline-danger" data-bs-dismiss="offcanvas">Cancel</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Enrollment History -->
+  <div class="modal fade" id="enrollmentHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Enrollment History - <span id="enrollmentStudentName"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Current Enrollment Card -->
+          <div id="currentEnrollmentCard" class="card mb-4 border-success" style="display: none;">
+            <div class="card-header bg-success text-white">
+              <i class="ri ri-checkbox-circle-line me-1"></i> Current Active Enrollment
+            </div>
+            <div class="card-body">
+              <div class="row mb-2">
+                <div class="col-md-6">
+                  <strong>Classroom:</strong> <span id="currentClassroom"></span>
+                </div>
+                <div class="col-md-6">
+                  <strong>Academic Year:</strong> <span id="currentAcademicYear"></span>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong>Enrolled At:</strong> <span id="currentEnrolledAt"></span>
+                </div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-warning btn-sm" id="btnTransferStudent">
+                  <i class="ri ri-arrow-left-right-line me-1"></i> Transfer
+                </button>
+                <button class="btn btn-info btn-sm" id="btnGraduateStudent">
+                  <i class="ri ri-graduation-cap-line me-1"></i> Graduate
+                </button>
+                <button class="btn btn-danger btn-sm" id="btnDropStudent">
+                  <i class="ri ri-user-unfollow-line me-1"></i> Drop
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Current Enrollment -->
+          <div id="noCurrentEnrollment" class="alert alert-warning" style="display: none;">
+            <i class="ri ri-error-warning-line me-1"></i> No active enrollment.
+            <button class="btn btn-primary btn-sm ms-2" id="btnEnrollNow">
+              <i class="ri ri-add-line me-1"></i> Enroll Now
+            </button>
+          </div>
+
+          <!-- Enrollment History Table -->
+          <h6 class="mb-3">Enrollment History</h6>
+          <div class="table-responsive">
+            <table class="table table-sm" id="enrollmentHistoryTable">
+              <thead>
+                <tr>
+                  <th>Academic Year</th>
+                  <th>Classroom</th>
+                  <th>Status</th>
+                  <th>Enrolled At</th>
+                  <th>Left At</th>
+                </tr>
+              </thead>
+              <tbody id="enrollmentHistoryBody">
+                <tr>
+                  <td colspan="5" class="text-center text-muted">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quick Enroll/Transfer -->
+  <div class="modal fade" id="quickEnrollModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="quickEnrollModalTitle">Enroll Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="quickEnrollForm">
+          <div class="modal-body">
+            <input type="hidden" id="quickEnrollStudentId">
+            <input type="hidden" id="quickEnrollAction" value="enroll">
+
+            <div class="mb-4">
+              <label class="form-label">Academic Year <span class="text-danger">*</span></label>
+              <select class="form-select" id="quickEnrollAcademicYear" required>
+                <option value="">Select Academic Year...</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Classroom <span class="text-danger">*</span></label>
+              <select class="form-select" id="quickEnrollClassroom" required>
+                <option value="">Select Classroom...</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="quickEnrollDate" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnQuickEnrollSubmit">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Graduate/Drop Confirmation -->
+  <div class="modal fade" id="studentActionConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="studentActionConfirmTitle">Confirm Action</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="studentActionEnrollmentId">
+          <input type="hidden" id="studentActionType">
+          <p id="studentActionConfirmMessage"></p>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" id="studentActionDate">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnStudentActionConfirm">Confirm</button>
+        </div>
       </div>
     </div>
   </div>

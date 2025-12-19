@@ -45,6 +45,12 @@ class UpdateScheduleRequest extends FormRequest
                 'integer',
                 'exists:academic_years,id',
             ],
+            'semester_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:semesters,id',
+            ],
             'day_of_week' => [
                 'sometimes',
                 'required',
@@ -84,6 +90,7 @@ class UpdateScheduleRequest extends FormRequest
             'subject_id.exists' => 'Selected subject does not exist.',
             'teacher_id.exists' => 'Selected teacher does not exist.',
             'academic_year_id.exists' => 'Selected academic year does not exist.',
+            'semester_id.exists' => 'Selected semester does not exist.',
             'day_of_week.in' => 'Day of week must be between 1 (Monday) and 6 (Saturday).',
             'start_time.date_format' => 'Start time must be in HH:MM format.',
             'end_time.date_format' => 'End time must be in HH:MM format.',

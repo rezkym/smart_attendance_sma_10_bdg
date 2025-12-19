@@ -45,11 +45,7 @@ class UpdateStudentRequest extends FormRequest
                 'nullable',
                 'date',
             ],
-            'classroom_id' => [
-                'nullable',
-                'integer',
-                'exists:classrooms,id',
-            ],
+            // classroom_id removed - Phase G: use enrollment
             'is_active' => [
                 'nullable',
                 'boolean',
@@ -75,7 +71,7 @@ class UpdateStudentRequest extends FormRequest
             'nis.max' => 'NIS must not exceed 20 characters.',
             'rfid_card_number.unique' => 'This RFID card number is already registered by another student.',
             'rfid_card_number.max' => 'RFID card number must not exceed 50 characters.',
-            'classroom_id.exists' => 'Selected classroom does not exist.',
+            // classroom_id message removed - Phase G
         ];
     }
 }

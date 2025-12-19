@@ -15,14 +15,6 @@ class DefaultUserSeeder extends Seeder
                 'name' => 'Admin',
                 'email' => 'admin@a.com',
             ],
-            'teacher' => [
-                'name' => 'Teacher',
-                'email' => 'teacher@a.com',
-            ],
-            'student' => [
-                'name' => 'Student',
-                'email' => 'student@a.com',
-            ],
         ];
 
         foreach ($users as $role => $data) {
