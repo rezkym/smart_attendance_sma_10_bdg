@@ -432,7 +432,7 @@
     <li class="nav-item navbar-dropdown dropdown-user dropdown">
       <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
         <div class="avatar avatar-online">
-          <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}"
+          <img src="{{ asset('assets/img/avatars/1.png') }}"
             alt="avatar" class="rounded-circle" />
         </div>
       </a>
@@ -443,7 +443,7 @@
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-2">
                 <div class="avatar avatar-online">
-                  <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}"
+                  <img src="{{ asset('assets/img/avatars/1.png') }}"
                     alt="alt" class="w-px-40 h-auto rounded-circle" />
                 </div>
               </div>
@@ -455,7 +455,7 @@
                     John Doe
                   @endif
                 </h6>
-                <small class="text-body-secondary">Admin</small>
+                <small class="text-body-secondary">{{ Auth::user()->role }}</small>
               </div>
             </div>
           </a>

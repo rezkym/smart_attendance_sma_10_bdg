@@ -161,10 +161,10 @@ $(function () {
               '<div class="d-flex align-items-center">' +
               '<a href="javascript:;" class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record" data-id="' +
               full['id'] +
-              '"><i class="ri-delete-bin-7-line ri-20px"></i></a>' +
+              '"><i class="icon-base ri ri-delete-bin-7-line icon-22px"></i></a>' +
               '<a href="javascript:;" class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-record" data-id="' +
               full['id'] +
-              '" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddClassroom"><i class="ri-edit-box-line ri-20px"></i></a>' +
+              '" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddClassroom"><i class="icon-base ri ri-edit-box-line icon-22px"></i></a>' +
               '</div>'
             );
           }
