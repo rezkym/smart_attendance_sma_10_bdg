@@ -102,15 +102,30 @@
       "name": "teacher",
       "guard_name": "web",
       "permissions": [
-        "dashboard.view",
+        "teacher-dashboard.view",
+        "teacher-schedules.view-own",
+        "teacher-attendances.view-own",
+        "teacher-attendances.create-own",
+        "teacher-attendances.update-own",
         "students.view",
-        "teachers.view",
         "classrooms.view",
         "subjects.view",
-        "schedules.view",
-        "attendances.view",
-        "attendances.create",
-        "attendances.update"
+        "schedules.view"
+      ]
+    },
+    {
+      "name": "homeroom",
+      "guard_name": "web",
+      "permissions": [
+        "teacher-dashboard.view",
+        "homeroom.view",
+        "homeroom.view-students",
+        "homeroom.manage-students",
+        "leave-requests.view",
+        "leave-requests.approve",
+        "leave-requests.reject",
+        "students.view",
+        "classrooms.view"
       ]
     },
     {

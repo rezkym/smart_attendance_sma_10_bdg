@@ -91,6 +91,21 @@
     { "name": "rfid-cards.delete", "guard_name": "web" },
     { "name": "rfid-cards.block", "guard_name": "web" },
 
-    { "name": "activity-logs.view", "guard_name": "web" }
+    { "name": "activity-logs.view", "guard_name": "web" },
+
+    { "name": "teacher-dashboard.view", "guard_name": "web" },
+    { "name": "teacher-schedules.view-own", "guard_name": "web" },
+    { "name": "teacher-attendances.view-own", "guard_name": "web" },
+    { "name": "teacher-attendances.create-own", "guard_name": "web" },
+    { "name": "teacher-attendances.update-own", "guard_name": "web" },
+
+    { "name": "homeroom.view", "guard_name": "web" },
+    { "name": "homeroom.view-students", "guard_name": "web" },
+    { "name": "homeroom.manage-students", "guard_name": "web" },
+
+    { "name": "leave-requests.view", "guard_name": "web" },
+    { "name": "leave-requests.create", "guard_name": "web" },
+    { "name": "leave-requests.approve", "guard_name": "web" },
+    { "name": "leave-requests.reject", "guard_name": "web" }
   ]
 }
