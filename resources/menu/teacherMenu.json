@@ -1,0 +1,22 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Teacher Portal",
+      "roles": ["teacher", "homeroom"]
+    },
+    {
+      "url": "/teacher",
+      "name": "Dashboard",
+      "icon": "menu-icon icon-base ri ri-dashboard-line",
+      "slug": "teacher.dashboard",
+      "permissions": ["teacher-dashboard.view"]
+    },
+    {
+      "url": "/teacher/my-schedules",
+      "name": "My Schedules",
+      "icon": "menu-icon icon-base ri ri-calendar-schedule-line",
+      "slug": "teacher.my-schedules",
+      "permissions": ["teacher-schedules.view-own"]
+    }
+  ]
+}
